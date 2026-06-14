@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siswa Portal - Perpustakaan SMK As-Syafi'iyah</title>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 for Grid & Utilities -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Session Protection -->
+    <script>
+        const activeNis = localStorage.getItem("siswa_nis");
+        if (!activeNis) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+        /* ==================================================
+           MONGODB DESIGN SYSTEM (CSS VARIABLES)
+           ================================================== */
+        :root {
+            --color-brand-green: #00ed64;
+            --color-brand-green-dark: #008744;
+            --color-brand-teal: #001e2b;
+            --color-brand-teal-light: #002c3e;
+            --color-canvas: #ffffff;
+            --color-surface: #f9fbfa;
+            --color-text-primary: #1c2d38;
+            --color-text-secondary: #5c6c75;
+            --color-border: #e1e5e8;
+            
+            --badge-purple-bg: #f2edff;
+            --badge-purple-text: #7b3ff2;
+            --badge-orange-bg: #ffeee6;
+            --badge-orange-text: #fa6e39;
+            --badge-green-bg: #e3fcf0;
+            --badge-green-text: #008744;
+
+            --font-family: 'Euclid Circular A', 'Poppins', sans-serif;
+            
+            --radius-pill: 9999px;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 24px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 { color: var(--color-brand-teal); font-weight: 600; }
+
+        /* Buttons */
+        .btn-brand-primary {
+            background-color: var(--color-brand-green);
+            color: var(--color-brand-teal);
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+            padding: 10px 24px;
+            border: 1px solid var(--color-brand-green);
+            transition: all 0.2s ease;
+        }
+        .btn-brand-primary:hover { background-color: #00d359; color: var(--color-brand-teal); transform: translateY(-1px); }
+
+        .btn-brand-outline {
+            background-color: transparent;
+            color: var(--color-brand-teal);
+            border-radius: var(--radius-pill);
+            font-weight: 500;
+            padding: 10px 24px;
+            border: 1px solid var(--color-brand-teal);
+            transition: all 0.2s ease;
+        }
+        .btn-brand-outline:hover { background-color: var(--color-brand-teal); color: white; }
+
+        /* Inputs & Badges */
+        .search-pill-large {
+            display: flex; align-items: center; background: white; border: 1px solid var(--color-border);
+            border-radius: var(--radius-pill); padding: 8px 16px; height: 56px; box-shadow: var(--shadow-sm); width: 100%; max-width: 600px;
+        }
+        .search-pill-large input { border: none; outline: none; width: 100%; padding-left: 12px; font-size: 16px; font-family: inherit; }
+        .search-pill-large i { color: var(--color-text-secondary); font-size: 24px; }
+
+        .badge-brand { padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-tech { background-color: var(--badge-purple-bg); color: var(--badge-purple-text); }
+        .badge-fiction { background-color: var(--badge-orange-bg); color: var(--badge-orange-text); }
+        .badge-available { background-color: var(--badge-green-bg); color: var(--badge-green-text); }
+
+        /* Status Buku Background Colors */
+        .status-buku-ready {
+            background-color: var(--badge-green-bg);
+            color: var(--badge-green-text);
+            border: 1px solid rgba(0, 135, 68, 0.15);
+        }
+        .status-buku-borrowed {
+            background-color: #fff8e1;
+            color: #b78103;
+            border: 1px solid rgba(183, 129, 3, 0.15);
+        }
+        .status-buku-lost {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid rgba(185, 28, 28, 0.15);
+        }
+        .status-buku-damaged {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid rgba(75, 85, 99, 0.15);
+        }
+
+        /* Entrance Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .fade-in-card {
+            opacity: 0;
+            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* Cards */
+        .card-base {
+            background: var(--color-canvas);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-base:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 30, 43, 0.08);
+            border-color: var(--color-brand-green);
+        }
+        .card-base img {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-base:hover img {
+            transform: scale(1.06);
+        }
+
+        /* Layout */
+        .layout-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: var(--color-brand-teal); color: white; padding: 24px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 1000; }
+        .sidebar-logo { font-size: 18px; font-weight: 700; color: var(--color-brand-green); margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-logo i { font-size: 28px; }
+        .nav-item { 
+            padding: 12px 16px; 
+            margin-bottom: 8px; 
+            border-radius: var(--radius-md); 
+            color: #aab2b6; 
+            text-decoration: none; 
+            font-weight: 500; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            cursor: pointer; 
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item:hover { 
+            color: white; 
+            background-color: var(--color-brand-teal-light); 
+            transform: translateX(6px);
+        }
+        .nav-item.active { 
+            color: var(--color-brand-teal); 
+            background-color: var(--color-brand-green); 
+            box-shadow: 0 4px 15px rgba(0, 237, 100, 0.3);
+        }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 0; background-color: var(--color-surface); min-height: 100vh;}
+        .topbar { background-color: var(--color-canvas); border-bottom: 1px solid var(--color-border); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 900; }
+        .content-area { padding: 40px; }
+
+        /* Modal Layout */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,30,43,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+        .modal-card { background: var(--color-canvas); padding: 32px; border-radius: var(--radius-lg); width: 100%; max-width: 450px; box-shadow: var(--shadow-lg); position: relative; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; color: var(--color-text-secondary); cursor: pointer; }
+
+        /* Forms */
+        .form-label-custom { font-weight: 600; color: var(--color-brand-teal); font-size: 14px; margin-bottom: 6px; }
+        .form-control-custom { border-radius: var(--radius-md); border: 1px solid var(--color-border); padding: 10px 14px; width: 100%; outline: none; font-family: inherit; transition: border-color 0.2s; }
+        .form-control-custom:focus { border-color: var(--color-brand-teal); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 2100; display: flex; flex-direction: column; gap: 10px; }
+        .custom-toast { background-color: var(--color-brand-teal); color: white; padding: 14px 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 12px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .custom-toast.show { transform: translateY(0); opacity: 1; }
+        .custom-toast.success { border-left: 4px solid var(--color-brand-green); }
+        .custom-toast.error { border-left: 4px solid #f87171; }
+
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Sidebar Toggle styles */
+        @media (min-width: 993px) {
+            .sidebar-collapsed .sidebar {
+                transform: translateX(-260px);
+            }
+            .sidebar-collapsed .main-content {
+                margin-left: 0;
+            }
+        }
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-260px);
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                display: flex !important;
+                z-index: 1005;
+            }
+            .sidebar.mobile-show {
+                transform: translateX(0);
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,30,43,0.5);
+                z-index: 1001;
+                backdrop-filter: blur(2px);
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+            .main-content { margin-left: 0; }
+            .topbar { padding: 16px 20px; }
+            .content-area { padding: 20px; }
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 576px) {
+            .content-area { padding: 16px; }
+            .topbar { padding: 12px 16px; }
+            .search-pill-large { height: 48px; padding: 6px 12px; }
+            .search-pill-large input { font-size: 14px; }
+            .search-pill-large i { font-size: 20px; }
+            
+            .modal-card {
+                padding: 24px 16px;
+                margin: 10px;
+                border-radius: var(--radius-md);
+            }
+            .modal-card .d-flex.gap-3.justify-content-end {
+                flex-direction: column-reverse;
+                gap: 10px !important;
+            }
+            .modal-card .d-flex.gap-3.justify-content-end button {
+                width: 100%;
+                margin: 0;
+            }
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-member-card-wrapper, #printable-member-card-wrapper * {
+                visibility: visible;
+            }
+            #printable-member-card-wrapper {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) scale(1.3);
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .sidebar, .topbar, .toast-container, .modal-overlay, #sidebarOverlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SIDEBAR MOBILE OVERLAY -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="layout-wrapper" id="portal-siswa-panel">
+    <!-- SIDEBAR (SISWA EXCLUSIVE) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo" style="font-size: 12px; gap: 8px; line-height: 1.2;">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh6yAKbfTAPVLKjJh9fLh8jPGs7BhIbqrZDwBb4TvXRExl_tozRzC6Qc_B9eoI7kttGE3GnQYlhmA7sahUpfj-KkZHZxFRTorZhodmg8O9-8wfnnwVpm4Xed5_6APiikt1fFV4cUyXsUqGOgrD0xK0nGYQeIwFs819FUgR0RS9zohUdO9zN0JCllRx-ybyx/s1280/logo%20smk%20rmv%20bg.png" alt="Logo SMK" style="height: 32px; object-fit: contain; flex-shrink: 0;">
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 700; color: var(--color-brand-green); font-size: 13px;">Perpustakaan</span>
+                <span style="color: #ffffff; font-size: 10px; font-weight: 500;">SMK As-Syafiiyah</span>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <small class="text-uppercase text-muted d-block mb-2" style="font-size: 11px; letter-spacing: 1px;">Navigasi Siswa</small>
+            <a onclick="switchSiswaView('view-siswa-katalog', this)" class="nav-item active"><i class="ph ph-books"></i> Katalog Buku</a>
+            <a onclick="switchSiswaView('view-siswa-loans', this)" class="nav-item"><i class="ph ph-arrows-left-right"></i> Peminjaman Saya</a>
+            <a onclick="switchSiswaView('view-siswa-card', this)" class="nav-item"><i class="ph ph-identification-card"></i> Kartu Anggota</a>
+        </div>
+        
+        <div class="mt-auto">
+            <div class="p-3 rounded mb-3" style="background: var(--color-brand-teal-light); font-size: 12px;">
+                <div class="text-white-50 mb-1" style="font-size: 11px;">Akses Anggota</div>
+                <div class="fw-semibold text-white text-truncate" id="siswa-active-name">Loading...</div>
+            </div>
+            <a onclick="logoutSiswa()" class="nav-item" style="color: #f87171;"><i class="ph ph-sign-out"></i> Keluar / Logout</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <button class="btn btn-light border-0 d-flex align-items-center justify-content-center me-3" id="sidebarToggle" style="width: 44px; height: 44px; border-radius: 50%; background: var(--color-surface); color: var(--color-brand-teal); font-size: 24px;" onclick="toggleSidebar()">
+                <i class="ph ph-list"></i>
+            </button>
+            <div class="search-pill-large">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Cari buku berdasarkan judul, penulis, atau kategori..." id="siswaSearchInput" oninput="handleSiswaSearch()">
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+            
+            <!-- VIEW: SISWA - KATALOG BUKU -->
+            <div id="view-siswa-katalog" class="animate-fade-in">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="mb-1">Katalog Buku Digital & Fisik</h2>
+                        <p class="text-secondary mb-0">Cari buku favoritmu dan ajukan peminjaman secara mandiri.</p>
+                    </div>
+                </div>
+
+                <!-- Widget Rekomendasi Buku Terpopuler -->
+                <div id="popularBooksSection" class="mb-5" style="display: none;">
+                    <h5 class="mb-3 d-flex align-items-center gap-2" style="font-weight: 600; color: var(--color-brand-teal);">
+                        <i class="ph ph-fire-simple text-danger" style="font-size: 24px;"></i> Koleksi Buku Terpopuler
+                    </h5>
+                    <div class="row g-4" id="popularBooksGrid">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Kategori</label>
+                        <select class="form-select" id="siswaFilterKategori" onchange="applySiswaKatalogFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Kategori</option>
+                            <option value="Teknologi">Teknologi</option>
+                            <option value="Fiksi">Fiksi</option>
+                            <option value="Umum">Umum</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Format / Tipe</label>
+                        <select class="form-select" id="siswaFilterFormat" onchange="applySiswaKatalogFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Format</option>
+                            <option value="Fisik">Buku Fisik</option>
+                            <option value="E-Book">E-Book (Digital)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Katalog Grid -->
+                <div class="row g-4" id="siswaKatalogGrid">
+                    <!-- JS Generated Cards -->
+                </div>
+            </div>
+
+            <!-- VIEW: SISWA - PEMINJAMAN SAYA -->
+            <div id="view-siswa-loans" class="animate-fade-in" style="display: none;">
+                <div class="mb-4">
+                    <h2>Peminjaman Saya</h2>
+                    <p class="text-secondary">Daftar transaksi peminjaman aktif dan riwayat peminjaman Anda.</p>
+                </div>
+
+                <div id="siswaLoansContainer">
+                    <div class="row g-4" id="siswaLoansGrid">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SISWA - KARTU ANGGOTA -->
+            <div id="view-siswa-card" class="animate-fade-in" style="display: none;">
+                <div class="mb-4 no-print">
+                    <h2>Kartu Anggota Digital</h2>
+                    <p class="text-secondary">Kartu keanggotaan resmi Perpustakaan SMK As-Syafi'iyah. Silakan cetak untuk keperluan fisik.</p>
+                </div>
+
+                <div class="d-flex flex-column align-items-center gap-4 py-4">
+                    <!-- Premium Glassmorphic Card Container -->
+                    <div id="printable-member-card-wrapper">
+                        <div class="member-card-canvas" style="width: 380px; height: 240px; background: radial-gradient(circle at 10% 20%, #002c3e 0%, #001e2b 100%); border-radius: var(--radius-lg); border: 2px solid var(--color-brand-green); padding: 20px; color: white; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; font-family: var(--font-family);">
+                            <!-- Abstract Circular Glow Inside Card -->
+                            <div style="position: absolute; width: 150px; height: 150px; background: var(--color-brand-green); opacity: 0.15; filter: blur(50px); border-radius: 50%; top:-40px; right:-40px; pointer-events: none;"></div>
+                            
+                            <!-- Header Card -->
+                            <div class="d-flex justify-content-between align-items-start border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh6yAKbfTAPVLKjJh9fLh8jPGs7BhIbqrZDwBb4TvXRExl_tozRzC6Qc_B9eoI7kttGE3GnQYlhmA7sahUpfj-KkZHZxFRTorZhodmg8O9-8wfnnwVpm4Xed5_6APiikt1fFV4cUyXsUqGOgrD0xK0nGYQeIwFs819FUgR0RS9zohUdO9zN0JCllRx-ybyx/s1280/logo%20smk%20rmv%20bg.png" alt="Logo SMK" style="height: 28px; width: 28px; object-fit: contain;">
+                                    <div>
+                                        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.1;">PERPUSTAKAAN DIGITAL</div>
+                                        <div style="font-size: 9px; color: #aab2b6; font-weight: 500;">SMK AS-SYAFI'IYAH</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30" style="font-size: 8px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: var(--radius-pill);" id="member-card-role-badge">SISWA</span>
+                            </div>
+                            
+                            <!-- Body Card -->
+                            <div class="d-flex align-items-center gap-3 my-2">
+                                <!-- Profile Initial/Avatar Box -->
+                                <div id="member-card-avatar" class="d-flex align-items-center justify-content-center fw-bold text-dark rounded-circle" style="width: 68px; height: 68px; background-color: var(--color-brand-green); font-size: 28px; box-shadow: var(--shadow-sm); flex-shrink: 0;">
+                                    AF
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div style="font-size: 15px; font-weight: 700; line-height: 1.2; word-break: break-all; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="member-card-name">Ahmad Fauzi</div>
+                                    <div style="font-size: 11px; color: #aab2b6; margin-top: 2px;">NIS/NIP: <span class="fw-semibold text-white" id="member-card-nis">2401001</span></div>
+                                    <div style="font-size: 11px; color: #aab2b6; margin-top: 1px;" id="member-card-class-row">Kelas: <span class="fw-semibold text-white" id="member-card-class">XI PPLG</span></div>
+                                </div>
+                                <!-- QR CODE BOX -->
+                                <div id="member-card-qrcode" class="bg-white p-1 rounded" style="width: 64px; height: 64px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;"></div>
+                            </div>
+                            
+                            <!-- Footer Card -->
+                            <div class="d-flex justify-content-between align-items-center border-top pt-2" style="border-color: rgba(255,255,255,0.1) !important; font-size: 8px; color: #aab2b6;">
+                                <div>KARTU DIGITAL RESMI • BERLAKU SELAMA AKTIF</div>
+                                <div class="d-flex align-items-center gap-1"><i class="ph ph-shield-checkered text-success" style="font-size: 11px;"></i> SECURED</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Print Action Button -->
+                    <button class="btn btn-brand-primary no-print px-4 py-2" onclick="printMemberCard()"><i class="ph ph-printer"></i> Cetak Kartu Anggota</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- MODAL FORM PINJAM MANDIRI SISWA -->
+<div id="pinjamMandiriModal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closePinjamMandiriModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1">Konfirmasi Pengajuan Peminjaman</h5>
+            <p class="text-secondary" style="font-size: 13px;">Anda akan mengajukan peminjaman buku berikut. Tiket QR akan dibuat otomatis.</p>
+        </div>
+        
+        <!-- Detail Buku -->
+        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4">
+            <img id="pinjamBookCover" src="" alt="Cover" style="width: 44px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid var(--color-border);">
+            <div>
+                <h6 class="mb-1 fw-bold text-dark" id="pinjamBookTitle">Judul Buku</h6>
+                <small class="text-secondary d-block" id="pinjamBookAuthor">Penulis Buku</small>
+                <span class="badge bg-success bg-opacity-10 text-success mt-1" style="font-size:10px;"><i class="ph ph-check-circle"></i> Buku Ready</span>
+            </div>
+        </div>
+        
+        <form onsubmit="submitPinjamMandiri(event)">
+            <input type="hidden" id="pinjamBookId">
+            <p style="font-size: 13px; color: var(--color-text-secondary);">
+                Peminjaman menggunakan NIS aktif Anda: <strong id="confirmSiswaNisText"></strong>
+            </p>
+            
+            <div class="d-flex gap-3 justify-content-end mt-4">
+                <button type="button" class="btn btn-brand-outline" onclick="closePinjamMandiriModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Ajukan Peminjaman</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DETAIL TIKET PEMINJAMAN SISWA -->
+<div id="siswaTicketModal" class="modal-overlay">
+    <div class="modal-card text-center" style="max-width: 400px;">
+        <button class="modal-close" onclick="closeSiswaTicketModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1 text-success"><i class="ph ph-check-circle"></i> Tiket Berhasil Dibuat</h5>
+            <p class="text-secondary" style="font-size: 12px;">Tunjukkan Tiket QR ini ke Pustakawan untuk mengambil buku fisik Anda.</p>
+        </div>
+        
+        <!-- Ticket Box -->
+        <div class="p-3 border rounded mb-4" style="background-color: var(--color-surface); border-style: dashed !important; border-width: 2px !important;">
+            <h6 class="mb-3 text-uppercase font-monospace" id="ticketCode" style="letter-spacing: 1px; color: var(--color-brand-teal);">PJM-SMKAS-XXXXXX-XXXXX</h6>
+            
+            <div id="ticketQrcode" class="d-flex justify-content-center mb-3"></div>
+            
+            <div class="text-start border-top pt-3" style="font-size: 12px;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Peminjam:</span>
+                    <strong class="text-dark" id="ticketStudent">Loading...</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Kelas:</span>
+                    <span class="text-dark" id="ticketClass">Loading...</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Buku:</span>
+                    <strong class="text-dark text-truncate" style="max-width: 200px;" id="ticketBook">Loading...</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Batas Kembali:</span>
+                    <span class="text-danger fw-bold" id="ticketBatas">Loading...</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary">Status:</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning px-2" style="font-size: 10px;" id="ticketStatus">Menunggu</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-brand-primary w-100" onclick="closeSiswaTicketModal()">Tutup & Selesai</button>
+    </div>
+</div>
+
+<!-- MODAL DETAIL BUKU & ULASAN SISWA -->
+<div id="bookDetailsModal" class="modal-overlay">
+    <div class="modal-card modal-large" style="max-width: 650px; overflow-y: auto; max-height: 90vh;">
+        <button class="modal-close" onclick="closeBookDetailsModal()"><i class="ph ph-x"></i></button>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-4 text-center">
+                <img id="detailBookCover" src="" alt="Cover" style="width: 130px; height: 190px; object-fit: cover; border-radius: 8px; box-shadow: var(--shadow-md); border: 1px solid var(--color-border);">
+            </div>
+            <div class="col-12 col-sm-8">
+                <span class="badge-brand badge-tech mb-2" id="detailBookCategory">Kategori</span>
+                <span class="badge bg-dark bg-opacity-70 text-white ms-2" id="detailBookType" style="font-size: 11px; padding: 4px 8px; border-radius: var(--radius-pill);">Fisik</span>
+                <h4 class="mb-1 fw-bold text-dark mt-2" id="detailBookTitle">Judul Buku</h4>
+                <p class="text-secondary mb-3" style="font-size: 14px;">Penulis: <span id="detailBookAuthor" class="fw-medium text-dark"></span></p>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span id="detailAvgStars" class="text-warning fw-bold fs-5"><i class="ph-fill ph-star"></i> 4.5 / 5.0</span>
+                    <span class="text-muted" style="font-size: 13px;" id="detailReviewsCount">(0 ulasan)</span>
+                </div>
+                <div class="badge-brand status-buku-ready py-2 px-3" id="detailBookStatus">Buku Ready</div>
+                <div class="mt-3" id="detailActionBtnContainer">
+                    <!-- Action buttons dynamically inserted -->
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Tabbed Reviews & Rating -->
+        <div>
+            <h5 class="mb-3" style="font-weight: 600; color: var(--color-brand-teal);">Rating & Ulasan Siswa</h5>
+            
+            <!-- Submit Review Form -->
+            <form id="addReviewForm" onsubmit="submitReview(event)" class="p-3 bg-light rounded mb-4" style="border: 1px solid var(--color-border);">
+                <input type="hidden" id="reviewBookId">
+                <div class="mb-2">
+                    <label class="form-label-custom mb-1 d-block" style="font-size:13px;">Berikan Rating Anda:</label>
+                    <div class="d-flex gap-1" id="starRatingInput">
+                        <i class="ph ph-star cursor-pointer text-secondary" style="font-size: 24px;" onclick="setStarRating(1)"></i>
+                        <i class="ph ph-star cursor-pointer text-secondary" style="font-size: 24px;" onclick="setStarRating(2)"></i>
+                        <i class="ph ph-star cursor-pointer text-secondary" style="font-size: 24px;" onclick="setStarRating(3)"></i>
+                        <i class="ph ph-star cursor-pointer text-secondary" style="font-size: 24px;" onclick="setStarRating(4)"></i>
+                        <i class="ph ph-star cursor-pointer text-secondary" style="font-size: 24px;" onclick="setStarRating(5)"></i>
+                    </div>
+                    <input type="hidden" id="selectedStarRating" value="0" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom mb-1" for="reviewText" style="font-size:13px;">Tulis Ulasan / Komentar:</label>
+                    <textarea id="reviewText" class="form-control-custom" rows="2" placeholder="Bagikan pendapat Anda tentang buku ini..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-sm btn-brand-primary px-4">Kirim Ulasan</button>
+            </form>
+            
+            <!-- Review List Container -->
+            <div id="reviewsListFeed" class="d-flex flex-column gap-3" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    // ==================================================
+    // GLOBAL STATE MANAGEMENT (REACTIVE DATABASE & API)
+    // ==================================================
+    let apiEndpoint = localStorage.getItem("perpus_api_url") || "";
+    let isConnected = false;
+    let siswaActiveNis = localStorage.getItem("siswa_nis") || "";
+
+    let appState = {
+        students: [],
+        books: [],
+        loans: [],
+        logs: [],
+        reviews: []
+    };
+
+    function updateApiStatusIndicator() {
+        const icon = document.getElementById('siswa-db-status-icon');
+        const text = document.getElementById('siswa-db-status-text');
+        
+        if (!icon || !text) return;
+        if (!apiEndpoint) {
+            icon.className = "ph ph-gear text-muted";
+            text.innerHTML = "Database: Mode Demo 🟡";
+            text.style.color = "var(--color-text-primary)";
+        } else if (isConnected) {
+            icon.className = "ph ph-plugs-connected text-success";
+            text.innerHTML = "Database: Terhubung 🟢";
+            text.style.color = "var(--badge-green-text)";
+        } else {
+            icon.className = "ph ph-plugs text-danger";
+            text.innerHTML = "Database: Terputus 🔴";
+            text.style.color = "#ef4444";
+        }
+    }
+
+    async function loadData() {
+        if (!apiEndpoint) {
+            const savedState = localStorage.getItem("perpus_demo_state");
+            if (savedState) {
+                try {
+                    appState = JSON.parse(savedState);
+                } catch(e) {
+                    console.error("Gagal load demo state", e);
+                }
+            } else {
+                // Inisialisasi data contoh jika kosong
+                appState.students = [
+                    { nis: "2401001", nama: "Ahmad Fauzi", kejuruan: "PPLG", tingkat: "XI", status: "Aktif", peran: "Siswa", sandi: "" },
+                    { nis: "2401002", nama: "Budi Santoso", kejuruan: "PPLG", tingkat: "X", status: "Aktif", peran: "Siswa", sandi: "" },
+                    { nis: "2401003", nama: "Siti Aminah", kejuruan: "AKL", tingkat: "XII", status: "Aktif", peran: "Siswa", sandi: "" },
+                    { nis: "2401004", nama: "Cici Paramida", kejuruan: "MPLB 1", tingkat: "XI", status: "Aktif", peran: "Siswa", sandi: "" },
+                    { nis: "2401005", nama: "Dina Lestari", kejuruan: "MPLB 2", tingkat: "XI", status: "Aktif", peran: "Siswa", sandi: "" }
+                ];
+                appState.books = [
+                    { id: "BK-00045", judul: "Pemrograman Python", penulis: "Ahmad Fauzi", kategori: "Teknologi", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null },
+                    { id: "BK-00089", judul: "Jaringan Komputer", penulis: "Sandhika Galih", kategori: "Teknologi", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null },
+                    { id: "BK-00102", judul: "Bumi Manusia", penulis: "Pramoedya Ananta Toer", kategori: "Fiksi", tipe: "E-Book", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: "bumi_manusia_digital.pdf" },
+                    { id: "BK-00331", judul: "Desain Grafis Lanjut", penulis: "Cici Paramida", kategori: "Umum", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1561070791-26c113006238?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null }
+                ];
+                appState.loans = [];
+                appState.logs = [];
+            }
+            isConnected = false;
+            updateApiStatusIndicator();
+            afterDataLoaded();
+            return;
+        }
+
+        try {
+            const apiKey = localStorage.getItem("perpus_api_key") || "SMKAS_PERPUS_KEY_2026";
+            const url = `${apiEndpoint}?action=getAll&key=${apiKey}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const res = await response.json();
+            
+            if (res.success) {
+                appState.students = res.students || [];
+                appState.books = res.books || [];
+                appState.loans = res.loans || [];
+                appState.reviews = res.reviews || [];
+                appState.logs = res.logs || [];
+                isConnected = true;
+            } else {
+                throw new Error(res.message || "Gagal mengambil data");
+            }
+        } catch (err) {
+            console.error("Gagal koneksi API:", err);
+            isConnected = false;
+            showToast("Koneksi gagal. Menggunakan penyimpanan lokal (Mode Demo).", "error");
+            
+            const savedState = localStorage.getItem("perpus_demo_state");
+            if (savedState) {
+                try { appState = JSON.parse(savedState); } catch(e) {}
+            }
+        }
+        
+        updateApiStatusIndicator();
+        afterDataLoaded();
+    }
+
+    async function syncData(action, payload) {
+        if (!apiEndpoint) {
+            localStorage.setItem("perpus_demo_state", JSON.stringify(appState));
+            return true;
+        }
+
+        try {
+            const apiKey = localStorage.getItem("perpus_api_key") || "SMKAS_PERPUS_KEY_2026";
+            const response = await fetch(apiEndpoint, {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "text/plain"
+                },
+                body: JSON.stringify({ action: action, key: apiKey, payload: payload })
+            });
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const res = await response.json();
+            if (res.success) return true;
+            throw new Error(res.message || "API error");
+        } catch (e) {
+            console.error("Gagal sinkron data:", e);
+            showToast("Koneksi terputus. Perubahan disimpan lokal.", "error");
+            localStorage.setItem("perpus_demo_state", JSON.stringify(appState));
+            return false;
+        }
+    }
+
+    function addLocalLog(aktivitas, detail) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            aktivitas: aktivitas,
+            detail: detail
+        };
+        appState.logs.unshift(logEntry);
+        syncData("addLog", logEntry);
+    }
+
+    function afterDataLoaded() {
+        if (!appState.reviews) appState.reviews = [];
+        calculateDendaAndLateStatus();
+        
+        // Identitas siswa aktif
+        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        if (student) {
+            const roleLabel = student.peran ? ` (${student.peran})` : '';
+            document.getElementById('siswa-active-name').innerText = student.nama + roleLabel;
+        } else {
+            document.getElementById('siswa-active-name').innerText = `NIS: ${siswaActiveNis}`;
+        }
+        
+        renderSiswaKatalog();
+        renderPopularBooks();
+        
+        const isLoansView = document.getElementById('view-siswa-loans').style.display === 'block';
+        if (isLoansView) {
+            renderSiswaLoans();
+        }
+        
+        const isCardView = document.getElementById('view-siswa-card').style.display === 'block';
+        if (isCardView) {
+            renderMemberCard();
+        }
+    }
+
+    // ==================================================
+    // KALKULATOR DENDA & STATUS TERLAMBAT OTOMATIS
+    // ==================================================
+    function calculateDendaAndLateStatus() {
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let stateChanged = false;
+        
+        appState.loans.forEach(loan => {
+            if (loan.status === 'dipinjam' || loan.status === 'terlambat') {
+                let batasDate = parseIndonesianDate(loan.batas);
+                if (batasDate) {
+                    batasDate.setHours(0, 0, 0, 0);
+                    if (today > batasDate) {
+                        const diffTime = Math.abs(today - batasDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        let rawDenda = diffDays * 1000;
+                        let detail = `${diffDays} Hari x Rp 1.000`;
+                        
+                        let book = appState.books.find(b => b.id === loan.bookId);
+                        if (book && book.status === "Hilang") {
+                            rawDenda += 55000;
+                            detail = `Ganti Buku Hilang (Rp 55.000) + Keterlambatan (${diffDays} Hari x Rp 1.000)`;
+                        }
+                        
+                        if (loan.status !== 'terlambat' || loan.denda !== rawDenda || loan.detailDenda !== detail) {
+                            loan.status = 'terlambat';
+                            loan.denda = rawDenda;
+                            loan.detailDenda = detail;
+                            stateChanged = true;
+                        }
+                    }
+                }
+            }
+        });
+        
+        if (stateChanged) {
+            syncData("bulkUpdateLoans", appState.loans);
+        }
+    }
+
+    function parseIndonesianDate(dateStr) {
+        if (!dateStr) return null;
+        let parsed = new Date(dateStr);
+        if (!isNaN(parsed.getTime())) return parsed;
+        
+        const months = {
+            "jan": 0, "feb": 1, "mar": 2, "apr": 3, "mei": 4, "jun": 5,
+            "jul": 6, "agu": 7, "sep": 8, "okt": 9, "nov": 10, "des": 11,
+            "juni": 5, "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+        };
+        
+        let parts = dateStr.split(" ");
+        if (parts.length === 3) {
+            let day = parseInt(parts[0]);
+            let monthName = parts[1].toLowerCase().substring(0, 3);
+            let month = months[monthName];
+            let year = parseInt(parts[2]);
+            
+            if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+                return new Date(year, month, day);
+            }
+        }
+        return null;
+    }
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `custom-toast ${type}`;
+        
+        const icon = type === 'success' ? 'ph ph-check-circle' : 'ph ph-x-circle';
+        toast.innerHTML = `<i class="${icon}" style="font-size:20px;"></i> <span>${message}</span>`;
+        
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 50);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function switchSiswaView(viewId, element = null) {
+        const views = ['view-siswa-katalog', 'view-siswa-loans', 'view-siswa-card'];
+        views.forEach(id => {
+            const v = document.getElementById(id);
+            if (v) {
+                v.style.display = 'none';
+                v.classList.remove('animate-fade-in');
+            }
+        });
+        
+        const activeView = document.getElementById(viewId);
+        if (activeView) {
+            activeView.style.display = 'block';
+            void activeView.offsetWidth; // force reflow
+            activeView.classList.add('animate-fade-in');
+        }
+
+        if (element) {
+            document.querySelectorAll('.sidebar .nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        if (viewId === 'view-siswa-katalog') {
+            renderSiswaKatalog();
+            renderPopularBooks();
+        } else if (viewId === 'view-siswa-loans') {
+            renderSiswaLoans();
+        } else if (viewId === 'view-siswa-card') {
+            renderMemberCard();
+        }
+    }
+
+    // ==================================================
+    // RENDERING & FILTER KATALOG BUKU
+    // ==================================================
+    function renderSiswaKatalog(dataToRender = null) {
+        const grid = document.getElementById('siswaKatalogGrid');
+        if (!grid) return;
+        grid.innerHTML = "";
+        
+        const books = dataToRender || appState.books;
+        
+        if (books.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Koleksi buku tidak ditemukan.</div>`;
+            return;
+        }
+
+        books.forEach((b, index) => {
+            let statusClass = 'status-buku-ready';
+            if (b.status === "Sedang Dipinjam") statusClass = 'status-buku-borrowed';
+            if (b.status === "Hilang") statusClass = 'status-buku-lost';
+            if (b.status === "Rusak") statusClass = 'status-buku-damaged';
+
+            const coverImage = b.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+            
+            let actionBtn = "";
+            if (b.tipe === "E-Book") {
+                actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick="readEbook('${b.judul.replace(/'/g, "\\'")}', '${b.ebookFile || ''}')"><i class="ph ph-file-pdf"></i> Baca E-Book</button>`;
+            } else {
+                if (b.status === "Buku Ready") {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-primary w-100" onclick="openPinjamMandiriModal('${b.id}')"><i class="ph ph-plus-circle"></i> Pinjam Buku</button>`;
+                } else {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-light border w-100 text-muted" disabled><i class="ph ph-lock"></i> ${b.status}</button>`;
+                }
+            }
+
+            // Calculate reviews for rating display
+            const bookReviews = appState.reviews ? appState.reviews.filter(r => r.bookId === b.id) : [];
+            let ratingHtml = '<span class="text-muted" style="font-size: 10px;">Belum ada ulasan</span>';
+            if (bookReviews.length > 0) {
+                const totalRating = bookReviews.reduce((sum, r) => sum + Number(r.rating), 0);
+                const avgRating = (totalRating / bookReviews.length).toFixed(1);
+                ratingHtml = `<span class="text-warning fw-semibold" style="font-size: 11px;"><i class="ph-fill ph-star"></i> ${avgRating}</span>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = "col-6 col-sm-4 col-md-3 fade-in-card";
+            card.style.animationDelay = `${(index % 12) * 0.05}s`;
+            card.innerHTML = `
+                <div class="card-base p-3 d-flex flex-column justify-content-between h-100 cursor-pointer" onclick="openBookDetailsModal('${b.id}')">
+                    <div>
+                        <div class="position-relative mb-3 text-center" style="background-color: var(--color-surface); border-radius: var(--radius-md); padding: 12px; height: 180px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border);">
+                            <img src="${coverImage}" alt="${b.judul}" style="max-height: 160px; max-width: 110px; object-fit: cover; border-radius: 4px; box-shadow: var(--shadow-sm);">
+                            <span class="position-absolute top-2 right-2 badge bg-dark bg-opacity-70" style="font-size:9px;">${b.tipe}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge-brand badge-tech" style="font-size:10px;">${b.kategori}</span>
+                            ${ratingHtml}
+                        </div>
+                        <h6 class="mb-1 text-dark text-truncate-2" title="${b.judul}" style="font-size:14px; font-weight:600; line-height:1.3; min-height: 36px;">${b.judul}</h6>
+                        <small class="text-secondary d-block mb-2 text-truncate">${b.penulis}</small>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-1">
+                            <span class="badge-brand ${statusClass}" style="font-size:10px;">${b.status}</span>
+                        </div>
+                    </div>
+                    <div onclick="event.stopPropagation()">
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function handleSiswaSearch() {
+        const term = document.getElementById('siswaSearchInput').value.toLowerCase().trim();
+        const kOption = document.getElementById('siswaFilterKategori').value;
+        const fOption = document.getElementById('siswaFilterFormat').value;
+
+        const filtered = appState.books.filter(b => {
+            const matchesSearch = b.judul.toLowerCase().includes(term) || b.penulis.toLowerCase().includes(term) || b.id.toLowerCase().includes(term);
+            const matchesKategori = (kOption === 'ALL') || (b.kategori === kOption);
+            const matchesFormat = (fOption === 'ALL') || (b.tipe === fOption);
+            return matchesSearch && matchesKategori && matchesFormat;
+        });
+
+        renderSiswaKatalog(filtered);
+    }
+
+    function applySiswaKatalogFilters() {
+        handleSiswaSearch();
+    }
+
+    // ==================================================
+    // PINJAM MANDIRI & TIKET QR
+    // ==================================================
+    function openPinjamMandiriModal(bookId) {
+        const book = appState.books.find(b => b.id === bookId);
+        if (!book) return;
+
+        document.getElementById('pinjamBookId').value = book.id;
+        document.getElementById('pinjamBookTitle').innerText = book.judul;
+        document.getElementById('pinjamBookAuthor').innerText = book.penulis;
+        document.getElementById('pinjamBookCover').src = book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+        document.getElementById('confirmSiswaNisText').innerText = siswaActiveNis;
+        
+        document.getElementById('pinjamMandiriModal').style.display = 'flex';
+    }
+
+    function closePinjamMandiriModal() {
+        document.getElementById('pinjamMandiriModal').style.display = 'none';
+    }
+
+    async function submitPinjamMandiri(e) {
+        e.preventDefault();
+        
+        const bookId = document.getElementById('pinjamBookId').value;
+        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        
+        if (!student) {
+            showToast("Gagal! Data siswa tidak ditemukan.", "error");
+            return;
+        }
+        if (student.status !== "Aktif") {
+            showToast("Gagal! Status akun keanggotaan Anda tidak aktif.", "error");
+            return;
+        }
+
+        const book = appState.books.find(b => b.id === bookId);
+        if (!book || book.status !== "Buku Ready") {
+            showToast("Gagal! Buku tidak tersedia untuk dipinjam.", "error");
+            return;
+        }
+
+        const dateBatas = new Date();
+        dateBatas.setDate(dateBatas.getDate() + 7);
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+        const formattedBatas = `${dateBatas.getDate()} ${months[dateBatas.getMonth()]} ${dateBatas.getFullYear()}`;
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const monthName = String(now.getMonth() + 1).padStart(2, '0');
+        const prefix = `PJM-SMKAS-${year}${monthName}-`;
+        
+        let maxSeq = 0;
+        appState.loans.forEach(l => {
+            if (l.kode.startsWith(prefix)) {
+                const parts = l.kode.split('-');
+                const seq = parseInt(parts[parts.length - 1]);
+                if (seq > maxSeq) maxSeq = seq;
+            }
+        });
+        const nextSeqStr = String(maxSeq + 1).padStart(5, '0');
+        const newCode = `${prefix}${nextSeqStr}`;
+
+        const newLoan = {
+            kode: newCode,
+            nis: student.nis,
+            nama: student.nama,
+            kelas: `${student.tingkat} ${student.kejuruan}`,
+            bookId: book.id,
+            judul: book.judul,
+            status: "menunggu",
+            denda: 0,
+            detailDenda: "",
+            batas: formattedBatas,
+            tanggalMinta: new Date().toISOString().split('T')[0],
+            tanggalPinjam: "",
+            tanggalKembali: ""
+        };
+
+        appState.loans.unshift(newLoan);
+        closePinjamMandiriModal();
+        showToast("Pengajuan peminjaman berhasil diajukan!", "success");
+
+        showSiswaTicket(newLoan);
+
+        const success = await syncData("saveLoan", newLoan);
+        if (success) {
+            addLocalLog("Pengajuan PJM", `Siswa ${student.nama} mengajukan peminjaman mandiri kode ${newCode}.`);
+        }
+        afterDataLoaded();
+    }
+
+    function showSiswaTicket(loan) {
+        document.getElementById('ticketCode').innerText = loan.kode;
+        document.getElementById('ticketStudent').innerText = loan.nama;
+        document.getElementById('ticketClass').innerText = loan.kelas;
+        document.getElementById('ticketBook').innerText = loan.judul;
+        document.getElementById('ticketBatas').innerText = loan.batas;
+        
+        let statusText = "Menunggu";
+        let statusClass = "bg-warning bg-opacity-10 text-warning";
+        if (loan.status === "disiapkan") {
+            statusText = "Disiapkan";
+            statusClass = "bg-info bg-opacity-10 text-info";
+        } else if (loan.status === "dipinjam") {
+            statusText = "Dipinjam";
+            statusClass = "bg-success bg-opacity-10 text-success";
+        } else if (loan.status === "terlambat") {
+            statusText = "Terlambat";
+            statusClass = "bg-danger bg-opacity-10 text-danger";
+        } else if (loan.status === "selesai") {
+            statusText = "Selesai";
+            statusClass = "bg-secondary bg-opacity-10 text-secondary";
+        }
+        
+        const badge = document.getElementById('ticketStatus');
+        badge.innerText = statusText;
+        badge.className = `badge px-2 ${statusClass}`;
+
+        const qrcodeDiv = document.getElementById('ticketQrcode');
+        qrcodeDiv.innerHTML = "";
+        
+        setTimeout(() => {
+            new QRCode(qrcodeDiv, {
+                text: loan.kode,
+                width: 128,
+                height: 128,
+                colorDark : "#001e2b",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }, 100);
+
+        document.getElementById('siswaTicketModal').style.display = 'flex';
+    }
+
+    function closeSiswaTicketModal() {
+        document.getElementById('siswaTicketModal').style.display = 'none';
+    }
+
+    function readEbook(judul, file) {
+        if (file) {
+            showToast(`Membuka E-Book: ${judul}`, "success");
+            window.open(file, "_blank");
+        } else {
+            showToast("Berkas E-Book digital belum tersedia/diunggah.", "error");
+        }
+    }
+
+    // ==================================================
+    // PEMINJAMAN SAYA LIST
+    // ==================================================
+    function renderSiswaLoans() {
+        const grid = document.getElementById('siswaLoansGrid');
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        const myLoans = appState.loans.filter(l => l.nis === siswaActiveNis);
+
+        if (myLoans.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Anda belum memiliki riwayat pengajuan peminjaman.</div>`;
+            return;
+        }
+
+        myLoans.forEach(l => {
+            let statusBadge = "";
+            let actionBtn = "";
+            
+            switch(l.status) {
+                case 'menunggu':
+                    statusBadge = `<span class="badge bg-warning bg-opacity-10 text-warning px-2"><i class="ph ph-hourglass"></i> Menunggu Persetujuan</span>`;
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan Tiket QR</button>`;
+                    break;
+                case 'disiapkan':
+                    statusBadge = `<span class="badge bg-info bg-opacity-10 text-info px-2"><i class="ph ph-package"></i> Buku Disiapkan Pustakawan</span>`;
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan Tiket QR</button>`;
+                    break;
+                case 'dipinjam':
+                    statusBadge = `<span class="badge bg-success bg-opacity-10 text-success px-2"><i class="ph ph-book-open"></i> Sedang Dipinjam</span>`;
+                    actionBtn = `<small class="text-secondary d-block text-center mt-1">Batas Kembali: ${l.batas}</small>`;
+                    break;
+                case 'terlambat':
+                    statusBadge = `<span class="badge bg-danger bg-opacity-10 text-danger px-2"><i class="ph ph-warning-circle"></i> Terlambat Pengembalian</span>`;
+                    actionBtn = `
+                        <div class="text-danger fw-bold text-center mb-1" style="font-size: 13px;">Denda: Rp ${l.denda.toLocaleString('id-ID')}</div>
+                        <div class="text-muted text-center mb-2" style="font-size: 11px;">(${l.detailDenda})</div>
+                        <button type="button" class="btn btn-sm btn-dark w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan QR Denda</button>
+                    `;
+                    break;
+                case 'selesai':
+                    statusBadge = `<span class="badge bg-secondary bg-opacity-10 text-secondary px-2"><i class="ph ph-check-circle"></i> Selesai (Dikembalikan)</span>`;
+                    actionBtn = `<small class="text-muted d-block text-center mt-1"><i class="ph ph-flag"></i> Dikembalikan tepat waktu</small>`;
+                    break;
+            }
+
+            const card = document.createElement('div');
+            card.className = "col-12 col-md-6 col-lg-4";
+            card.innerHTML = `
+                <div class="card-base p-3 d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="font-monospace text-secondary" style="font-size:11px;">${l.kode}</span>
+                            ${statusBadge}
+                        </div>
+                        <h6 class="mb-1 fw-bold text-dark text-truncate">${l.judul}</h6>
+                        <small class="text-muted d-block mb-3">ID Buku: ${l.bookId}</small>
+                    </div>
+                    <div>
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+
+
+    // ==================================================
+    // LOGOUT
+    // ==================================================
+    function logoutSiswa() {
+        localStorage.removeItem("siswa_nis");
+        window.location.href = "index.html";
+    }
+
+    function toggleSidebar() {
+        const isMobile = window.innerWidth <= 992;
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        if (isMobile) {
+            sidebar.classList.toggle('mobile-show');
+            if (overlay) overlay.classList.toggle('show');
+        } else {
+            document.body.classList.toggle('sidebar-collapsed');
+        }
+    }
+
+    // ==================================================
+    // RATING, REVIEWS, POPULAR BOOKS, CARD UTILITIES
+    // ==================================================
+    let selectedRatingValue = 0;
+
+    function setStarRating(rating) {
+        selectedRatingValue = rating;
+        document.getElementById('selectedStarRating').value = rating;
+        const stars = document.querySelectorAll('#starRatingInput i');
+        stars.forEach((star, idx) => {
+            if (idx < rating) {
+                star.className = "ph-fill ph-star text-warning cursor-pointer";
+            } else {
+                star.className = "ph ph-star text-secondary cursor-pointer";
+            }
+        });
+    }
+
+    function openBookDetailsModal(bookId) {
+        const book = appState.books.find(b => b.id === bookId);
+        if (!book) return;
+
+        document.getElementById('reviewBookId').value = book.id;
+        document.getElementById('detailBookTitle').innerText = book.judul;
+        document.getElementById('detailBookAuthor').innerText = book.penulis;
+        document.getElementById('detailBookCategory').innerText = book.kategori;
+        document.getElementById('detailBookType').innerText = book.tipe;
+        document.getElementById('detailBookCover').src = book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+        
+        const statusBadge = document.getElementById('detailBookStatus');
+        statusBadge.innerText = book.status;
+        statusBadge.className = "badge-brand py-2 px-3 ";
+        if (book.status === "Buku Ready") statusBadge.classList.add('status-buku-ready');
+        else if (book.status === "Sedang Dipinjam") statusBadge.classList.add('status-buku-borrowed');
+        else if (book.status === "Hilang") statusBadge.classList.add('status-buku-lost');
+        else statusBadge.classList.add('status-buku-damaged');
+
+        const actionContainer = document.getElementById('detailActionBtnContainer');
+        actionContainer.innerHTML = "";
+        if (book.tipe === "E-Book") {
+            actionContainer.innerHTML = `<button type="button" class="btn btn-brand-outline w-100" onclick="readEbook('${book.judul.replace(/'/g, "\\'")}', '${book.ebookFile || ''}')"><i class="ph ph-file-pdf"></i> Baca E-Book</button>`;
+        } else {
+            if (book.status === "Buku Ready") {
+                actionContainer.innerHTML = `<button type="button" class="btn btn-brand-primary w-100" onclick="closeBookDetailsModal(); openPinjamMandiriModal('${book.id}')"><i class="ph ph-plus-circle"></i> Pinjam Buku Fisik</button>`;
+            } else {
+                actionContainer.innerHTML = `<button type="button" class="btn btn-light border w-100 text-muted" disabled><i class="ph ph-lock"></i> ${book.status}</button>`;
+            }
+        }
+
+        setStarRating(0);
+        document.getElementById('reviewText').value = "";
+        renderBookReviewsFeed(book.id);
+
+        document.getElementById('bookDetailsModal').style.display = 'flex';
+    }
+
+    function closeBookDetailsModal() {
+        document.getElementById('bookDetailsModal').style.display = 'none';
+    }
+
+    function renderBookReviewsFeed(bookId) {
+        const feed = document.getElementById('reviewsListFeed');
+        const starsText = document.getElementById('detailAvgStars');
+        const countText = document.getElementById('detailReviewsCount');
+        
+        if (!feed || !starsText || !countText) return;
+        
+        const bookReviews = appState.reviews ? appState.reviews.filter(r => r.bookId === bookId) : [];
+        countText.innerText = `(${bookReviews.length} ulasan)`;
+
+        if (bookReviews.length === 0) {
+            starsText.innerHTML = `<i class="ph ph-star text-muted"></i> - / 5.0`;
+            feed.innerHTML = `<div class="text-center text-secondary py-3" style="font-size: 13px;">Belum ada ulasan untuk buku ini. Jadilah yang pertama memberikan ulasan!</div>`;
+            return;
+        }
+
+        const totalRating = bookReviews.reduce((sum, r) => sum + Number(r.rating), 0);
+        const avgRating = (totalRating / bookReviews.length).toFixed(1);
+        starsText.innerHTML = `<i class="ph-fill ph-star text-warning"></i> ${avgRating} / 5.0`;
+
+        feed.innerHTML = "";
+        bookReviews.forEach(r => {
+            let starsHtml = "";
+            for (let i = 1; i <= 5; i++) {
+                if (i <= r.rating) {
+                    starsHtml += `<i class="ph-fill ph-star text-warning"></i>`;
+                } else {
+                    starsHtml += `<i class="ph ph-star text-secondary"></i>`;
+                }
+            }
+
+            const timestampStr = r.timestamp ? new Date(r.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
+            const item = document.createElement('div');
+            item.className = "p-2 rounded border-bottom";
+            item.style.fontSize = "13px";
+            item.innerHTML = `
+                <div class="d-flex justify-content-between mb-1">
+                    <strong class="text-dark">${r.nama}</strong>
+                    <small class="text-muted">${timestampStr}</small>
+                </div>
+                <div class="mb-1 text-warning">${starsHtml}</div>
+                <p class="text-secondary mb-0" style="font-size: 13px; line-height: 1.4;">${r.ulasan}</p>
+            `;
+            feed.appendChild(item);
+        });
+    }
+
+    async function submitReview(e) {
+        e.preventDefault();
+        const bookId = document.getElementById('reviewBookId').value;
+        const rating = Number(document.getElementById('selectedStarRating').value);
+        const ulasan = document.getElementById('reviewText').value.trim();
+        
+        if (rating === 0) {
+            showToast("Harap pilih rating bintang terlebih dahulu.", "error");
+            return;
+        }
+
+        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        if (!student) {
+            showToast("Gagal! Data siswa tidak valid.", "error");
+            return;
+        }
+
+        const newReview = {
+            id: `REV-${Date.now()}`,
+            bookId: bookId,
+            nama: student.nama,
+            rating: rating,
+            ulasan: ulasan,
+            timestamp: new Date().toISOString()
+        };
+
+        if (!appState.reviews) appState.reviews = [];
+        appState.reviews.unshift(newReview);
+        
+        showToast("Ulasan Anda berhasil dikirim!", "success");
+
+        let savedState = {};
+        try {
+            savedState = JSON.parse(localStorage.getItem("perpus_demo_state")) || {};
+        } catch(err) {}
+        savedState.reviews = appState.reviews;
+        localStorage.setItem("perpus_demo_state", JSON.stringify(savedState));
+
+        const success = await syncData("saveReview", newReview);
+        if (success) {
+            addLocalLog("Ulasan Buku", `Ulasan baru dikirim untuk buku ID ${bookId} oleh ${student.nama}.`);
+        }
+
+        renderBookReviewsFeed(bookId);
+        renderSiswaKatalog();
+        renderPopularBooks();
+    }
+
+    function renderPopularBooks() {
+        const section = document.getElementById('popularBooksSection');
+        const grid = document.getElementById('popularBooksGrid');
+        if (!section || !grid) return;
+
+        const loanCounts = {};
+        appState.loans.forEach(l => {
+            if (l.bookId) {
+                loanCounts[l.bookId] = (loanCounts[l.bookId] || 0) + 1;
+            }
+        });
+
+        const sortedBooks = appState.books
+            .map(b => ({ ...b, borrowCount: loanCounts[b.id] || 0 }))
+            .filter(b => b.borrowCount > 0)
+            .sort((a, b) => b.borrowCount - a.borrowCount)
+            .slice(0, 4);
+
+        if (sortedBooks.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        grid.innerHTML = "";
+
+        sortedBooks.forEach((b, index) => {
+            let statusClass = 'status-buku-ready';
+            if (b.status === "Sedang Dipinjam") statusClass = 'status-buku-borrowed';
+            if (b.status === "Hilang") statusClass = 'status-buku-lost';
+            if (b.status === "Rusak") statusClass = 'status-buku-damaged';
+
+            const coverImage = b.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+            
+            let actionBtn = "";
+            if (b.tipe === "E-Book") {
+                actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick="readEbook('${b.judul.replace(/'/g, "\\'")}', '${b.ebookFile || ''}')"><i class="ph ph-file-pdf"></i> Baca E-Book</button>`;
+            } else {
+                if (b.status === "Buku Ready") {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-primary w-100" onclick="openPinjamMandiriModal('${b.id}')"><i class="ph ph-plus-circle"></i> Pinjam Buku</button>`;
+                } else {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-light border w-100 text-muted" disabled><i class="ph ph-lock"></i> ${b.status}</button>`;
+                }
+            }
+
+            const bookReviews = appState.reviews ? appState.reviews.filter(r => r.bookId === b.id) : [];
+            let ratingHtml = '<span class="text-muted" style="font-size: 10px;">Belum ada ulasan</span>';
+            if (bookReviews.length > 0) {
+                const totalRating = bookReviews.reduce((sum, r) => sum + Number(r.rating), 0);
+                const avgRating = (totalRating / bookReviews.length).toFixed(1);
+                ratingHtml = `<span class="text-warning fw-semibold" style="font-size: 11px;"><i class="ph-fill ph-star"></i> ${avgRating}</span>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = "col-12 col-sm-6 col-md-3 fade-in-card";
+            card.style.animationDelay = `${index * 0.08}s`;
+            card.innerHTML = `
+                <div class="card-base p-3 d-flex flex-column justify-content-between h-100 position-relative cursor-pointer" onclick="openBookDetailsModal('${b.id}')" style="background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(240,249,244,1) 100%); border: 1px solid rgba(0, 237, 100, 0.2);">
+                    <div class="position-absolute top-2 left-2 bg-danger text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; font-size: 12px; z-index: 10; box-shadow: var(--shadow-sm);">
+                        #${index + 1}
+                    </div>
+                    <div>
+                        <div class="position-relative mb-3 text-center" style="background-color: white; border-radius: var(--radius-md); padding: 12px; height: 180px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border);">
+                            <img src="${coverImage}" alt="${b.judul}" style="max-height: 160px; max-width: 110px; object-fit: cover; border-radius: 4px; box-shadow: var(--shadow-sm);">
+                            <span class="position-absolute top-2 right-2 badge bg-dark bg-opacity-70" style="font-size:9px;">${b.tipe}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge-brand badge-tech" style="font-size:10px;">${b.kategori}</span>
+                            ${ratingHtml}
+                        </div>
+                        <h6 class="mb-1 text-dark text-truncate-2" title="${b.judul}" style="font-size:14px; font-weight:600; line-height:1.3; min-height: 36px;">${b.judul}</h6>
+                        <small class="text-secondary d-block mb-2 text-truncate">${b.penulis}</small>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge-brand ${statusClass}" style="font-size:10px;">${b.status}</span>
+                            <small class="text-muted" style="font-size: 11px;"><i class="ph ph-hand-pointing"></i> ${b.borrowCount}x dipinjam</small>
+                        </div>
+                    </div>
+                    <div onclick="event.stopPropagation()">
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderMemberCard() {
+        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        if (!student) return;
+
+        document.getElementById('member-card-name').innerText = student.nama;
+        document.getElementById('member-card-nis').innerText = student.nis;
+        
+        const roleBadge = document.getElementById('member-card-role-badge');
+        roleBadge.innerText = student.peran || "SISWA";
+        
+        const classRow = document.getElementById('member-card-class-row');
+        if (student.peran === "Siswa") {
+            classRow.style.display = "block";
+            document.getElementById('member-card-class').innerText = `${student.tingkat} ${student.kejuruan}`;
+        } else {
+            classRow.style.display = "none";
+        }
+
+        const names = student.nama.split(" ");
+        let initials = "";
+        if (names.length > 0) initials += names[0].charAt(0).toUpperCase();
+        if (names.length > 1) initials += names[1].charAt(0).toUpperCase();
+        if (initials === "") initials = "AF";
+        document.getElementById('member-card-avatar').innerText = initials;
+
+        const qrDiv = document.getElementById('member-card-qrcode');
+        qrDiv.innerHTML = "";
+        new QRCode(qrDiv, {
+            text: student.nis,
+            width: 56,
+            height: 56,
+            colorDark : "#001e2b",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.M
+        });
+    }
+
+    function printMemberCard() {
+        window.print();
+    }
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+    });
+</script>
+</body>
+</html>

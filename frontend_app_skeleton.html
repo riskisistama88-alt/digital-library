@@ -1,0 +1,2767 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Perpustakaan SMK As-Syafi'iyah</title>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 for Grid & Utilities -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* ==================================================
+           MONGODB DESIGN SYSTEM (CSS VARIABLES)
+           ================================================== */
+        :root {
+            --color-brand-green: #00ed64;
+            --color-brand-green-dark: #008744;
+            --color-brand-teal: #001e2b;
+            --color-brand-teal-light: #002c3e;
+            --color-canvas: #ffffff;
+            --color-surface: #f9fbfa;
+            --color-text-primary: #1c2d38;
+            --color-text-secondary: #5c6c75;
+            --color-border: #e1e5e8;
+            
+            --badge-purple-bg: #f2edff;
+            --badge-purple-text: #7b3ff2;
+            --badge-orange-bg: #ffeee6;
+            --badge-orange-text: #fa6e39;
+            --badge-green-bg: #e3fcf0;
+            --badge-green-text: #008744;
+
+            --font-family: 'Euclid Circular A', 'Poppins', sans-serif;
+            
+            --radius-pill: 9999px;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 24px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 { color: var(--color-brand-teal); font-weight: 600; }
+
+        /* Buttons */
+        .btn-brand-primary {
+            background-color: var(--color-brand-green);
+            color: var(--color-brand-teal);
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+            padding: 10px 24px;
+            border: 1px solid var(--color-brand-green);
+            transition: all 0.2s ease;
+        }
+        .btn-brand-primary:hover { background-color: #00d359; color: var(--color-brand-teal); transform: translateY(-1px); }
+
+        .btn-brand-outline {
+            background-color: transparent;
+            color: var(--color-brand-teal);
+            border-radius: var(--radius-pill);
+            font-weight: 500;
+            padding: 10px 24px;
+            border: 1px solid var(--color-brand-teal);
+            transition: all 0.2s ease;
+        }
+        .btn-brand-outline:hover { background-color: var(--color-brand-teal); color: white; }
+
+        /* Inputs & Badges */
+        .search-pill-large {
+            display: flex; align-items: center; background: white; border: 1px solid var(--color-border);
+            border-radius: var(--radius-pill); padding: 8px 16px; height: 56px; box-shadow: var(--shadow-sm); width: 100%; max-width: 600px;
+        }
+        .search-pill-large input { border: none; outline: none; width: 100%; padding-left: 12px; font-size: 16px; font-family: inherit; }
+        .search-pill-large i { color: var(--color-text-secondary); font-size: 24px; }
+
+        .badge-brand { padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-tech { background-color: var(--badge-purple-bg); color: var(--badge-purple-text); }
+        .badge-fiction { background-color: var(--badge-orange-bg); color: var(--badge-orange-text); }
+        .badge-available { background-color: var(--badge-green-bg); color: var(--badge-green-text); }
+
+        /* Status Buku Background Colors */
+        .status-buku-ready {
+            background-color: var(--badge-green-bg);
+            color: var(--badge-green-text);
+            border: 1px solid rgba(0, 135, 68, 0.15);
+        }
+        .status-buku-borrowed {
+            background-color: #fff8e1;
+            color: #b78103;
+            border: 1px solid rgba(183, 129, 3, 0.15);
+        }
+        .status-buku-lost {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid rgba(185, 28, 28, 0.15);
+        }
+        .status-buku-damaged {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid rgba(75, 85, 99, 0.15);
+        }
+
+        /* Cards */
+        .card-base {
+            background: var(--color-canvas); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
+            padding: 24px; transition: transform 0.2s, box-shadow 0.2s; height: 100%; display: flex; flex-direction: column;
+        }
+        .card-base:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #c0c6ca; }
+
+        /* Dashboard Metric Cards */
+        .metric-card {
+            background: var(--color-canvas);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--color-brand-teal);
+        }
+        .metric-card.primary::before { background: var(--color-brand-green); }
+        .metric-card.danger::before { background: #ef4444; }
+        .metric-card.warning::before { background: #f59e0b; }
+        
+        .metric-icon-box {
+            width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+
+        /* Layout */
+        .layout-wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: var(--color-brand-teal); color: white; padding: 24px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 1000; }
+        .sidebar-logo { font-size: 18px; font-weight: 700; color: var(--color-brand-green); margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-logo i { font-size: 28px; }
+        .nav-item { padding: 12px 16px; margin-bottom: 8px; border-radius: var(--radius-md); color: #aab2b6; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: all 0.2s; cursor: pointer; }
+        .nav-item i { font-size: 20px; }
+        .nav-item:hover { color: white; background-color: var(--color-brand-teal-light); }
+        .nav-item.active { color: var(--color-brand-teal); background-color: var(--color-brand-green); }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 0; background-color: var(--color-surface); min-height: 100vh;}
+        .topbar { background-color: var(--color-canvas); border-bottom: 1px solid var(--color-border); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 900; }
+        .content-area { padding: 40px; }
+
+        /* Admin Tabs & Table */
+        .admin-tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--color-border); padding-bottom: 16px; overflow-x: auto; }
+        .admin-tab { padding: 8px 20px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--color-text-secondary); background: transparent; border: 1px solid transparent; transition: all 0.2s; white-space: nowrap; }
+        .admin-tab:hover { background: var(--color-surface); }
+        .admin-tab.active { background: var(--color-brand-teal); color: white; }
+
+        .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .admin-table th { background-color: var(--color-surface); color: var(--color-text-secondary); font-weight: 600; font-size: 13px; text-transform: uppercase; padding: 16px 20px; border-bottom: 2px solid var(--color-border); text-align: left; }
+        .admin-table td { padding: 18px 20px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+        .admin-table tr:hover td { background-color: #fcfcfc; }
+
+        /* File Upload Dropzones */
+        .upload-dropzone {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            background-color: var(--color-surface);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .upload-dropzone:hover {
+            border-color: var(--color-brand-green-dark);
+            background-color: rgba(0, 237, 100, 0.03);
+        }
+        .upload-dropzone i {
+            font-size: 28px;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .upload-dropzone span {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+        .upload-dropzone strong {
+            color: var(--color-brand-teal);
+            display: block;
+            font-size: 13px;
+        }
+        .preview-upload-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background-color: var(--color-canvas);
+        }
+
+        /* Modal Layout */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,30,43,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+        .modal-card { background: var(--color-canvas); padding: 32px; border-radius: var(--radius-lg); width: 100%; max-width: 450px; box-shadow: var(--shadow-lg); position: relative; }
+        .modal-card.modal-large { max-width: 580px; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; color: var(--color-text-secondary); cursor: pointer; }
+
+        /* Forms */
+        .form-label-custom { font-weight: 600; color: var(--color-brand-teal); font-size: 14px; margin-bottom: 6px; }
+        .form-control-custom { border-radius: var(--radius-md); border: 1px solid var(--color-border); padding: 10px 14px; width: 100%; outline: none; font-family: inherit; transition: border-color 0.2s; }
+        .form-control-custom:focus { border-color: var(--color-brand-teal); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 2100; display: flex; flex-direction: column; gap: 10px; }
+        .custom-toast { background-color: var(--color-brand-teal); color: white; padding: 14px 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 12px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .custom-toast.show { transform: translateY(0); opacity: 1; }
+        .custom-toast.success { border-left: 4px solid var(--color-brand-green); }
+        .custom-toast.error { border-left: 4px solid #f87171; }
+
+        @media (max-width: 992px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .topbar { padding: 16px 20px; }
+            .content-area { padding: 20px; }
+        }
+
+        /* Skeleton Loading Animations & Classes */
+        @keyframes pulse {
+            0% { opacity: 0.6; background-color: #f1f3f5; }
+            50% { opacity: 1; background-color: #e2e8f0; }
+            100% { opacity: 0.6; background-color: #f1f3f5; }
+        }
+        .skeleton-line {
+            height: 16px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+            width: 100%;
+            margin: 6px 0;
+        }
+        .skeleton-image {
+            width: 32px;
+            height: 46px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .cursor-pointer:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: var(--color-brand-green) !important;
+            transform: translateY(-4px) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
+        }
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- PORTAL: ROLE SELECTOR -->
+<div id="view-role-selector" style="display: flex; min-height: 100vh; background: linear-gradient(135deg, var(--color-brand-teal) 0%, var(--color-brand-teal-light) 100%); align-items: center; justify-content: center; padding: 24px; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; overflow-y: auto;">
+    <div class="text-center" style="max-width: 650px; width: 100%;">
+        <div class="mb-4">
+            <i class="ph ph-shield-checkered text-success" style="font-size: 80px; color: var(--color-brand-green)!important;"></i>
+            <h1 class="text-white mt-3 mb-1" style="font-weight: 700; letter-spacing: -0.5px;">Portal Perpustakaan</h1>
+            <p style="color: #aab2b6; font-size: 16px;">SMK As-Syafi'iyah Jakarta</p>
+        </div>
+        
+        <div class="row g-4 mt-2 justify-content-center">
+            <!-- Pustakawan (Admin) Card -->
+            <div class="col-12 col-sm-6">
+                <div class="card-base text-center p-5 cursor-pointer" onclick="selectRole('admin')" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.3s ease;">
+                    <div class="metric-icon-box mx-auto mb-4" style="background-color: rgba(0, 237, 100, 0.15); color: var(--color-brand-green); width: 64px; height: 64px; font-size: 32px;">
+                        <i class="ph ph-users-three"></i>
+                    </div>
+                    <h5 class="text-white mb-2">Pustakawan</h5>
+                    <p style="color: #aab2b6; font-size: 13px; min-height: 40px; margin-bottom: 0;">Panel pengelolaan buku, data anggota, sirkulasi, denda, dan monitoring.</p>
+                </div>
+            </div>
+            
+            <!-- Siswa (Anggota) Card -->
+            <div class="col-12 col-sm-6">
+                <div class="card-base text-center p-5 cursor-pointer" onclick="selectRole('siswa')" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.3s ease;">
+                    <div class="metric-icon-box mx-auto mb-4" style="background-color: rgba(123, 63, 242, 0.2); color: #a78bfa; width: 64px; height: 64px; font-size: 32px;">
+                        <i class="ph ph-student"></i>
+                    </div>
+                    <h5 class="text-white mb-2">Siswa / Anggota</h5>
+                    <p style="color: #aab2b6; font-size: 13px; min-height: 40px; margin-bottom: 0;">Katalog buku mandiri, pengajuan peminjaman, dan riwayat status denda.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-5 text-muted" style="font-size: 12px;">
+            Sistem Informasi Perpustakaan Digital Terintegrasi Google Sheets.
+        </div>
+    </div>
+</div>
+
+<!-- PORTAL: ADMIN PANEL -->
+<div class="layout-wrapper" id="portal-admin-panel" style="display: none;">
+    <!-- SIDEBAR (ADMIN EXCLUSIVE) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <i class="ph ph-shield-checkered"></i>
+            AdminPerpus
+        </div>
+        
+        <div class="menu-section">
+            <small class="text-uppercase text-muted d-block mb-2" style="font-size: 11px; letter-spacing: 1px;">Navigasi Panel</small>
+            <a onclick="switchView('view-admin-dashboard', this)" class="nav-item active"><i class="ph ph-chart-pie-slice"></i> Dashboard</a>
+            <a onclick="switchView('view-admin-peminjaman', this)" class="nav-item d-flex justify-content-between align-items-center">
+                <span><i class="ph ph-arrows-left-right"></i> Sirkulasi Peminjaman</span>
+                <span id="sidebar-request-badge" style="display: none; background-color: #f59e0b; color: #ffffff; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">0</span>
+            </a>
+            <a onclick="switchView('view-admin-siswa', this)" class="nav-item"><i class="ph ph-users-three"></i> Data Anggota/Siswa</a>
+            <a onclick="switchView('view-admin-buku', this)" class="nav-item"><i class="ph ph-books"></i> Inventaris Buku</a>
+        </div>
+        
+        <div class="mt-auto">
+            <div class="p-3 rounded mb-3" style="background: var(--color-brand-teal-light); font-size: 12px;">
+                <div class="text-muted">Petugas Aktif</div>
+                <div class="fw-semibold text-white">Admin Utama (Pustakawan)</div>
+            </div>
+            <a href="#" class="nav-item" style="color: #f87171;"><i class="ph ph-sign-out"></i> Keluar Panel</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="search-pill-large">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Cari data sirkulasi, anggota, atau katalog..." id="searchInput" oninput="handleGlobalSearch()">
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-light border d-flex align-items-center gap-2" style="border-radius: var(--radius-pill); padding: 8px 16px; font-weight: 500;" onclick="openConfigModal()">
+                    <i class="ph ph-gear" id="db-status-icon"></i>
+                    <span id="db-status-text">Database: Mode Demo 🟡</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area" id="app">
+            
+            <!-- VIEW: ADMIN - DASHBOARD ANALYTICS -->
+            <div id="view-admin-dashboard">
+                <div class="mb-4">
+                    <h2 class="mb-1">Statistik Perpustakaan</h2>
+                    <p class="text-secondary mb-0">Overview status inventaris dan transaksi sirkulasi hari ini.</p>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="metric-card primary">
+                            <div>
+                                <small class="text-secondary d-block mb-1">Total Judul Buku</small>
+                                <h3 class="mb-0" id="kpi-total-buku">0</h3>
+                            </div>
+                            <div class="metric-icon-box" style="background-color: var(--badge-green-bg); color: var(--badge-green-text);">
+                                <i class="ph ph-book"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="metric-card">
+                            <div>
+                                <small class="text-secondary d-block mb-1">Anggota Aktif</small>
+                                <h3 class="mb-0" id="kpi-total-siswa">0</h3>
+                            </div>
+                            <div class="metric-icon-box" style="background-color: var(--badge-purple-bg); color: var(--badge-purple-text);">
+                                <i class="ph ph-student"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="metric-card warning">
+                            <div>
+                                <small class="text-secondary d-block mb-1">Peminjaman Berjalan</small>
+                                <h3 class="mb-0" id="kpi-peminjaman-aktif">0</h3>
+                            </div>
+                            <div class="metric-icon-box" style="background-color: #fff8e1; color: #b78103;">
+                                <i class="ph ph-hand-pointing"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="metric-card danger">
+                            <div>
+                                <small class="text-secondary d-block mb-1">Terlambat & Denda</small>
+                                <h3 class="mb-0" id="kpi-terlambat">0</h3>
+                            </div>
+                            <div class="metric-icon-box" style="background-color: #fee2e2; color: #b91c1c;">
+                                <i class="ph ph-warning-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphic & Recent Activities -->
+                <div class="row g-4">
+                    <div class="col-12 col-lg-8">
+                        <div class="card-base">
+                            <h5 class="mb-4">Statistik Keaktifan Peminjaman Kelas</h5>
+                            <div class="d-flex align-items-end justify-content-between pt-4" id="classKeaktifanChart" style="height: 220px; border-bottom: 2px solid var(--color-border); padding-bottom: 10px;">
+                                <!-- Dirender dinamis oleh JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card-base">
+                            <h5 class="mb-3">Log Aktivitas Petugas</h5>
+                            <ul class="list-unstyled mb-0" id="officerLogsList" style="font-size: 13px;">
+                                <!-- Dirender dinamis oleh JS -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ADMIN - SIRKULASI PEMINJAMAN -->
+            <div id="view-admin-peminjaman" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="mb-1">Sirkulasi Peminjaman</h2>
+                        <p class="text-secondary mb-0">Sistem alur kerja pengelolaan peminjaman buku fisik menggunakan verifikasi scan QR.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-brand-outline" onclick="openPeminjamanModal()"><i class="ph ph-plus-circle"></i> Tambah Peminjaman</button>
+                        <button class="btn btn-brand-primary" onclick="showMockScanner()"><i class="ph ph-scan"></i> Scan QR Tiket</button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="admin-tabs" id="adminTabs">
+                    <div class="admin-tab active" onclick="filterAdminTable('all', this)">Semua</div>
+                    <div class="admin-tab" onclick="filterAdminTable('menunggu', this)">Permintaan Siswa <span id="tab-request-badge" style="display: none; background-color: #f59e0b; color: #ffffff; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold; margin-left: 6px;">0</span></div>
+                    <div class="admin-tab" onclick="filterAdminTable('disiapkan', this)">Disiapkan</div>
+                    <div class="admin-tab" onclick="filterAdminTable('dipinjam', this)">Dipinjam</div>
+                    <div class="admin-tab" onclick="filterAdminTable('terlambat', this)">Terlambat</div>
+                    <div class="admin-tab" onclick="filterAdminTable('selesai', this)">Selesai / Riwayat</div>
+                </div>
+
+                <!-- Table -->
+                <div class="card-base p-0" style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Kode Transaksi</th>
+                                <th>Peminjam</th>
+                                <th>Buku & Kode</th>
+                                <th>Status Peminjaman</th>
+                                <th>Status Buku</th>
+                                <th class="text-end">Aksi (Alur Kerja)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sirkulasiTableBody">
+                            <!-- Generated dynamically by JS state -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: ADMIN - CRUD ANGGOTA/SISWA -->
+            <div id="view-admin-siswa" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="mb-1">Kelola Data Anggota</h2>
+                        <p class="text-secondary mb-0">Manajemen siswa aktif SMK As-Syafi'iyah (12 Kelas dari 4 Jurusan).</p>
+                    </div>
+                    <button class="btn btn-brand-primary" onclick="openSiswaModal()"><i class="ph ph-user-plus"></i> Tambah Siswa</button>
+                </div>
+
+                <!-- Filters Panel -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label-custom">Filter Kejuruan</label>
+                        <select class="form-select" id="filterKejuruan" onchange="applySiswaFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Kejuruan</option>
+                            <option value="PPLG">PPLG</option>
+                            <option value="AKL">AKL</option>
+                            <option value="MPLB 1">MPLB 1</option>
+                            <option value="MPLB 2">MPLB 2</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label-custom">Filter Tingkat Kelas</label>
+                        <select class="form-select" id="filterTingkat" onchange="applySiswaFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Tingkat</option>
+                            <option value="X">Kelas X</option>
+                            <option value="XI">Kelas XI</option>
+                            <option value="XII">Kelas XII</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <button class="btn btn-brand-outline w-100" onclick="resetSiswaFilters()"><i class="ph ph-arrows-counter-clockwise"></i> Reset Filter</button>
+                    </div>
+                </div>
+
+                <!-- Table Anggota -->
+                <div class="card-base p-0" style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>NIS</th>
+                                <th>Nama Lengkap</th>
+                                <th>Kejuruan</th>
+                                <th>Kelas</th>
+                                <th>Status Akun</th>
+                                <th class="text-end">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="siswaTableBody">
+                            <!-- JS Generated Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: ADMIN - CRUD BUKU -->
+            <div id="view-admin-buku" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="mb-1">Inventaris Buku & E-Book</h2>
+                        <p class="text-secondary mb-0">Kelola buku fisik sekolah serta file digital repository (pdf).</p>
+                    </div>
+                    <button class="btn btn-brand-primary" onclick="openBukuModal()"><i class="ph ph-book-open"></i> Tambah Koleksi</button>
+                </div>
+
+                <!-- Filters Buku -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Kategori Buku</label>
+                        <select class="form-select" id="filterKategoriBuku" onchange="applyBukuFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Kategori</option>
+                            <option value="Teknologi">Teknologi</option>
+                            <option value="Fiksi">Fiksi</option>
+                            <option value="Umum">Umum</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Format Koleksi</label>
+                        <select class="form-select" id="filterFormatBuku" onchange="applyBukuFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Format</option>
+                            <option value="Fisik">Buku Fisik</option>
+                            <option value="E-Book">E-Book (Digital)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table Buku -->
+                <div class="card-base p-0" style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Buku</th>
+                                <th>Cover & Judul Buku</th>
+                                <th>Penulis & Kategori</th>
+                                <th>Tipe Buku</th>
+                                <th>Status Buku</th>
+                                <th class="text-end">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bukuTableBody">
+                            <!-- JS Generated Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- PORTAL: SISWA PANEL -->
+<div class="layout-wrapper" id="portal-siswa-panel" style="display: none;">
+    <!-- SIDEBAR (SISWA EXCLUSIVE) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <i class="ph ph-graduation-cap"></i>
+            SiswaPerpus
+        </div>
+        
+        <div class="menu-section">
+            <small class="text-uppercase text-muted d-block mb-2" style="font-size: 11px; letter-spacing: 1px;">Navigasi Siswa</small>
+            <a onclick="switchSiswaView('view-siswa-katalog', this)" class="nav-item active"><i class="ph ph-books"></i> Katalog Buku</a>
+            <a onclick="switchSiswaView('view-siswa-loans', this)" class="nav-item"><i class="ph ph-arrows-left-right"></i> Peminjaman Saya</a>
+        </div>
+        
+        <div class="mt-auto">
+            <div class="p-3 rounded mb-3" style="background: var(--color-brand-teal-light); font-size: 12px;">
+                <div class="text-muted">Akses Anggota</div>
+                <div class="fw-semibold text-white text-truncate" id="siswa-active-name">Tamu / Umum</div>
+            </div>
+            <a onclick="goToRoleSelector()" class="nav-item" style="color: #f87171;"><i class="ph ph-sign-out"></i> Beralih Peran</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="search-pill-large">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Cari buku berdasarkan judul, penulis, atau kategori..." id="siswaSearchInput" oninput="handleSiswaSearch()">
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-light border d-flex align-items-center gap-2" style="border-radius: var(--radius-pill); padding: 8px 16px; font-weight: 500;" onclick="openConfigModal()">
+                    <i class="ph ph-gear" id="siswa-db-status-icon"></i>
+                    <span id="siswa-db-status-text">Database: Mode Demo 🟡</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+            
+            <!-- VIEW: SISWA - KATALOG BUKU -->
+            <div id="view-siswa-katalog">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="mb-1">Katalog Buku Digital & Fisik</h2>
+                        <p class="text-secondary mb-0">Cari buku favoritmu dan ajukan peminjaman secara mandiri.</p>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Kategori</label>
+                        <select class="form-select" id="siswaFilterKategori" onchange="applySiswaKatalogFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Kategori</option>
+                            <option value="Teknologi">Teknologi</option>
+                            <option value="Fiksi">Fiksi</option>
+                            <option value="Umum">Umum</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-custom">Format / Tipe</label>
+                        <select class="form-select" id="siswaFilterFormat" onchange="applySiswaKatalogFilters()" style="border-radius: var(--radius-md); padding: 10px;">
+                            <option value="ALL">Semua Format</option>
+                            <option value="Fisik">Buku Fisik</option>
+                            <option value="E-Book">E-Book (Digital)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Katalog Grid -->
+                <div class="row g-4" id="siswaKatalogGrid">
+                    <!-- JS Generated Cards -->
+                </div>
+            </div>
+
+            <!-- VIEW: SISWA - PEMINJAMAN SAYA -->
+            <div id="view-siswa-loans" style="display: none;">
+                <div class="mb-4">
+                    <h2>Cek Peminjaman Saya</h2>
+                    <p class="text-secondary">Masukkan Nomor Induk Siswa (NIS) Anda yang terdaftar untuk memeriksa status peminjaman buku.</p>
+                </div>
+
+                <div class="card-base mb-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-8">
+                            <label class="form-label-custom" for="siswaSearchNis">Nomor Induk Siswa (NIS)</label>
+                            <input type="text" id="siswaSearchNis" class="form-control-custom" placeholder="Contoh: 2401001" style="height:50px;">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <button class="btn btn-brand-primary w-100" style="height:50px;" onclick="checkSiswaLoans()"><i class="ph ph-magnifying-glass"></i> Periksa Status Peminjaman</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="siswaLoansContainer" style="display: none;">
+                    <h5 class="mb-3">Daftar Transaksi Peminjaman Anda</h5>
+                    <div class="row g-4" id="siswaLoansGrid">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+
+<!-- MODAL TAMBAH/EDIT SISWA -->
+<div id="siswaModal" class="modal-overlay">
+    <div class="modal-card modal-large">
+        <button class="modal-close" onclick="closeSiswaModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 id="siswaModalTitle" class="mb-1">Tambah Siswa Baru</h5>
+            <p class="text-secondary" style="font-size: 13px;">Lengkapi data isian sesuai dokumen kependidikan siswa aktif.</p>
+        </div>
+        <form id="siswaForm" onsubmit="saveSiswa(event)">
+            <input type="hidden" id="siswaFormMode" value="create">
+            <input type="hidden" id="siswaOriginalNis" value="">
+
+            <div class="mb-3">
+                <label class="form-label-custom" for="siswaNis">Nomor Induk Siswa (NIS)</label>
+                <input type="text" id="siswaNis" class="form-control-custom" placeholder="Contoh: 2401001" required pattern="^[0-9]+$" title="NIS hanya boleh berupa angka">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom" for="siswaNama">Nama Lengkap</label>
+                <input type="text" id="siswaNama" class="form-control-custom" placeholder="Contoh: Ahmad Fauzi" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label-custom" for="siswaKejuruan">Kejuruan</label>
+                    <select id="siswaKejuruan" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                        <option value="PPLG">PPLG</option>
+                        <option value="AKL">AKL</option>
+                        <option value="MPLB 1">MPLB 1</option>
+                        <option value="MPLB 2">MPLB 2</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label-custom" for="siswaTingkat">Tingkat Kelas</label>
+                    <select id="siswaTingkat" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                        <option value="X">Kelas X</option>
+                        <option value="XI">Kelas XI</option>
+                        <option value="XII">Kelas XII</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label-custom" for="siswaStatus">Status Akun</label>
+                <select id="siswaStatus" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Non-aktif">Non-aktif</option>
+                </select>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-brand-outline" onclick="closeSiswaModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Simpan Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH/EDIT BUKU -->
+<div id="bukuModal" class="modal-overlay">
+    <div class="modal-card modal-large">
+        <button class="modal-close" onclick="closeBukuModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 id="bukuModalTitle" class="mb-1">Tambah Koleksi Buku</h5>
+            <p class="text-secondary" style="font-size: 13px;">Kelola e-book digital atau buku fisik perpustakaan beserta sampul bukunya.</p>
+        </div>
+        <form id="bukuForm" onsubmit="saveBuku(event)">
+            <input type="hidden" id="bukuFormMode" value="create">
+            <input type="hidden" id="bukuOriginalId" value="">
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label-custom" for="bukuId">ID Buku</label>
+                    <input type="text" id="bukuId" class="form-control-custom" placeholder="Contoh: BK-00045" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label-custom" for="bukuFormat">Format Buku</label>
+                    <select id="bukuFormat" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                        <option value="Fisik">Buku Fisik</option>
+                        <option value="E-Book">E-Book (Digital)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom" for="bukuJudul">Judul Buku</label>
+                <input type="text" id="bukuJudul" class="form-control-custom" placeholder="Contoh: Pemrograman Python" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label-custom" for="bukuPenulis">Penulis</label>
+                    <input type="text" id="bukuPenulis" class="form-control-custom" placeholder="Nama penulis..." required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label-custom" for="bukuKategori">Kategori</label>
+                    <select id="bukuKategori" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                        <option value="Teknologi">Teknologi</option>
+                        <option value="Fiksi">Fiksi</option>
+                        <option value="Umum">Umum</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- UPLOAD COVER BUKU -->
+            <div class="mb-3">
+                <label class="form-label-custom">Upload Cover Buku</label>
+                <input type="file" id="bukuCoverInput" accept="image/*" class="d-none" onchange="handleCoverUpload(event)">
+                <div class="upload-dropzone" onclick="document.getElementById('bukuCoverInput').click()">
+                    <i class="ph ph-image-square"></i>
+                    <strong>Klik untuk memilih gambar cover</strong>
+                    <span>Format: JPG, PNG, WEBP (Maks. 2MB)</span>
+                </div>
+                <div id="coverPreviewBox" class="preview-upload-box" style="display: none;">
+                    <img id="coverPreviewImg" src="" alt="Pratinjau Cover" style="width: 48px; height: 68px; object-fit: cover; border-radius: 4px;">
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-dark" style="font-size: 13px;" id="coverFileName">filename.png</div>
+                        <small class="text-secondary" style="font-size: 11px;">Berhasil dimuat secara lokal</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-light text-danger" onclick="removeCoverUpload(event)"><i class="ph ph-trash"></i></button>
+                </div>
+            </div>
+
+            <!-- UPLOAD PDF E-BOOK -->
+            <div class="mb-4" id="ebookLinkArea" style="display: none;">
+                <label class="form-label-custom">Upload Berkas PDF E-Book</label>
+                <input type="file" id="bukuEbookInput" accept=".pdf" class="d-none" onchange="handleEbookUpload(event)">
+                <div class="upload-dropzone" onclick="document.getElementById('bukuEbookInput').click()" style="background-color: #fafbfc;">
+                    <i class="ph ph-file-pdf" style="color: #ef4444;"></i>
+                    <strong>Pilih berkas PDF E-book digital</strong>
+                    <span>Format: PDF (Maks. 15MB)</span>
+                </div>
+                <div id="ebookPreviewBox" class="preview-upload-box" style="display: none;">
+                    <div class="metric-icon-box" style="background-color: #fee2e2; color: #ef4444; width: 36px; height: 36px; font-size: 18px; border-radius: var(--radius-md);">
+                        <i class="ph ph-file-pdf"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-dark" style="font-size: 13px;" id="ebookFileName">buku_digital.pdf</div>
+                        <small class="text-secondary" style="font-size: 11px;">File PDF siap digunakan</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-light text-danger" onclick="removeEbookUpload(event)"><i class="ph ph-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-brand-outline" onclick="closeBukuModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Simpan Buku</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CONFIRM DELETE -->
+<div id="confirmDeleteModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="text-center mb-4">
+            <i class="ph ph-warning-octagon text-danger" style="font-size: 48px;"></i>
+            <h5 class="mt-2" id="deleteModalTitle">Hapus Data?</h5>
+            <p class="text-secondary mt-1" style="font-size: 13px;" id="deleteModalDesc">Tindakan ini permanen dan tidak dapat dibatalkan.</p>
+        </div>
+        <input type="hidden" id="deleteTargetId">
+        <input type="hidden" id="deleteTargetType">
+        <div class="d-flex gap-3 justify-content-end">
+            <button class="btn btn-brand-outline flex-grow-1" onclick="closeDeleteModal()">Batal</button>
+            <button class="btn btn-danger text-white flex-grow-1" style="border-radius: var(--radius-pill);" onclick="executeDelete()">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SCANNER MOCKUP -->
+<div id="scannerModal" class="modal-overlay">
+    <div class="modal-card text-center">
+        <button class="modal-close" onclick="closeScannerModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-3">
+            <i class="ph ph-qr-code text-success" style="font-size: 64px;"></i>
+        </div>
+        <h5>Simulasikan Pemindaian Tiket QR</h5>
+        <p class="text-secondary mb-4" style="font-size: 13px;">Pilih salah satu jenis transaksi simulasi sirkulasi.</p>
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-brand-outline text-start d-flex align-items-center justify-content-between p-3" onclick="triggerMockScan('PJM-SMKAS-202606-00001', 'disetujui')">
+                <div>
+                    <strong class="d-block">Scan Tiket Pengambilan (Ahmad Fauzi)</strong>
+                    <small class="text-muted">Proses status 'Menunggu' menjadi 'Disiapkan'</small>
+                </div>
+                <i class="ph ph-arrow-right"></i>
+            </button>
+            <button class="btn btn-brand-outline text-start d-flex align-items-center justify-content-between p-3" onclick="triggerMockScan('PJM-SMKAS-202606-00002', 'dipinjam')">
+                <div>
+                    <strong class="d-block">Scan Serah Terima Buku (Budi Santoso)</strong>
+                    <small class="text-muted">Proses status 'Disiapkan' menjadi 'Dipinjam'</small>
+                </div>
+                <i class="ph ph-arrow-right"></i>
+            </button>
+            <button class="btn btn-brand-outline text-start d-flex align-items-center justify-content-between p-3" onclick="triggerMockScan('PJM-SMKAS-202605-00099', 'selesai')">
+                <div>
+                    <strong class="d-block">Scan Pengembalian Buku Hilang (Dina Lestari)</strong>
+                    <small class="text-muted">Ganti rugi selesai & memulihkan status buku dari 'Hilang'</small>
+                </div>
+                <i class="ph ph-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL KONFIGURASI DATABASE API -->
+<div id="configModal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeConfigModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1">Konfigurasi Database API</h5>
+            <p class="text-secondary" style="font-size: 13px;">Hubungkan aplikasi ke database Google Sheets Anda menggunakan URL Google Apps Script Web App.</p>
+        </div>
+        <form id="configForm" onsubmit="saveConfig(event)">
+            <div class="mb-3">
+                <label class="form-label-custom" for="apiEndpointInput">URL Google Apps Script Web App</label>
+                <input type="url" id="apiEndpointInput" class="form-control-custom" placeholder="https://script.google.com/macros/s/.../exec" required>
+                <small class="text-muted d-block mt-1" style="font-size: 11px;">URL didapatkan saat men-deploy Google Apps Script sebagai Web App.</small>
+            </div>
+            <div class="d-flex gap-2 justify-content-between mb-4">
+                <button type="button" class="btn btn-brand-outline flex-grow-1" onclick="testApiConnection()"><i class="ph ph-plugs"></i> Tes Koneksi</button>
+                <button type="button" class="btn btn-light text-danger border flex-grow-1" onclick="clearConfig()"><i class="ph ph-trash"></i> Hapus URL</button>
+            </div>
+            <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-brand-outline" onclick="closeConfigModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Simpan Konfigurasi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL TAMBAH PEMINJAMAN BARU -->
+<div id="peminjamanModal" class="modal-overlay">
+    <div class="modal-card modal-large">
+        <button class="modal-close" onclick="closePeminjamanModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1">Tambah Transaksi Peminjaman Baru</h5>
+            <p class="text-secondary" style="font-size: 13px;">Daftarkan transaksi peminjaman buku untuk siswa secara manual.</p>
+        </div>
+        <form id="peminjamanForm" onsubmit="savePeminjaman(event)">
+            <div class="mb-3 position-relative">
+                <label class="form-label-custom" for="loanStudentSearch">Pilih Anggota / Siswa</label>
+                <div class="d-flex align-items-center position-relative">
+                    <input type="text" id="loanStudentSearch" class="form-control-custom" placeholder="Ketik nama atau NIS untuk mencari..." onfocus="showStudentDropdown()" oninput="filterStudentDropdown()" autocomplete="off" required>
+                    <i class="ph ph-caret-down position-absolute" style="right: 16px; color: var(--color-text-secondary); pointer-events: none;"></i>
+                </div>
+                <input type="hidden" id="loanStudentNis" required>
+                <input type="hidden" id="loanStudentClass">
+                <div id="studentSearchDropdown" class="card-base p-2 position-absolute w-100 mt-1" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1050; box-shadow: var(--shadow-lg); background: white;">
+                    <!-- Diisi dinamis -->
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label-custom" for="loanBookId">Pilih Buku (Hanya Buku Ready)</label>
+                <select id="loanBookId" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                    <!-- Diisi dinamis -->
+                </select>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-6">
+                    <label class="form-label-custom" for="loanBatas">Batas Pengembalian</label>
+                    <input type="date" id="loanBatas" class="form-control-custom" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label-custom" for="loanStatus">Status Peminjaman</label>
+                    <select id="loanStatus" class="form-select" style="border-radius: var(--radius-md); padding: 10px 14px;" required>
+                        <option value="disiapkan" selected>Disiapkan (Oleh Petugas)</option>
+                        <option value="dipinjam">Dipinjam (Serahkan langsung)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-brand-outline" onclick="closePeminjamanModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Buat Transaksi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DETAIL TIKET PEMINJAMAN SISWA -->
+<div id="siswaTicketModal" class="modal-overlay">
+    <div class="modal-card text-center" style="max-width: 400px;">
+        <button class="modal-close" onclick="closeSiswaTicketModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1 text-success"><i class="ph ph-check-circle"></i> Tiket Berhasil Dibuat</h5>
+            <p class="text-secondary" style="font-size: 12px;">Tunjukkan Tiket QR ini ke Pustakawan untuk mengambil buku fisik Anda.</p>
+        </div>
+        
+        <!-- Ticket Box -->
+        <div class="p-3 border rounded mb-4" style="background-color: var(--color-surface); border-style: dashed !important; border-width: 2px !important;">
+            <h6 class="mb-3 text-uppercase font-monospace" id="ticketCode" style="letter-spacing: 1px; color: var(--color-brand-teal);">PJM-SMKAS-XXXXXX-XXXXX</h6>
+            
+            <div id="ticketQrcode" class="d-flex justify-content-center mb-3"></div>
+            
+            <div class="text-start border-top pt-3" style="font-size: 12px;">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Peminjam:</span>
+                    <strong class="text-dark" id="ticketStudent">Ahmad Fauzi</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Kelas:</span>
+                    <span class="text-dark" id="ticketClass">XI PPLG</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Buku:</span>
+                    <strong class="text-dark text-truncate" style="max-width: 200px;" id="ticketBook">Pemrograman Python</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary">Batas Kembali:</span>
+                    <span class="text-danger fw-bold" id="ticketBatas">19 Jun 2026</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary">Status:</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning px-2" style="font-size: 10px;" id="ticketStatus">Menunggu</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-brand-primary w-100" onclick="closeSiswaTicketModal()">Tutup & Selesai</button>
+    </div>
+</div>
+
+<!-- MODAL FORM PINJAM MANDIRI SISWA -->
+<div id="pinjamMandiriModal" class="modal-overlay">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closePinjamMandiriModal()"><i class="ph ph-x"></i></button>
+        <div class="mb-4">
+            <h5 class="mb-1">Form Pengajuan Peminjaman</h5>
+            <p class="text-secondary" style="font-size: 13px;">Silakan masukkan Nomor Induk Siswa (NIS) Anda yang aktif untuk mengajukan peminjaman buku ini.</p>
+        </div>
+        
+        <!-- Detail Buku -->
+        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4">
+            <img id="pinjamBookCover" src="" alt="Cover" style="width: 44px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid var(--color-border);">
+            <div>
+                <h6 class="mb-1 fw-bold text-dark" id="pinjamBookTitle">Judul Buku</h6>
+                <small class="text-secondary d-block" id="pinjamBookAuthor">Penulis Buku</small>
+                <span class="badge bg-success bg-opacity-10 text-success mt-1" style="font-size:10px;"><i class="ph ph-check-circle"></i> Buku Ready</span>
+            </div>
+        </div>
+        
+        <form onsubmit="submitPinjamMandiri(event)">
+            <input type="hidden" id="pinjamBookId">
+            <div class="mb-4">
+                <label class="form-label-custom" for="pinjamSiswaNis">Masukkan NIS Anda</label>
+                <input type="text" id="pinjamSiswaNis" class="form-control-custom" placeholder="Contoh: 2401001" required>
+                <small class="text-muted mt-1 d-block" style="font-size: 11px;">Gunakan NIS Anda yang terdaftar (misal: 2401001 s.d 2401005 untuk data contoh).</small>
+            </div>
+            
+            <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-brand-outline" onclick="closePinjamMandiriModal()">Batal</button>
+                <button type="submit" class="btn btn-brand-primary">Ajukan Peminjaman</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    // ==================================================
+    // GLOBAL STATE MANAGEMENT (REACTIVE DATABASE & API)
+    // ==================================================
+    let apiEndpoint = localStorage.getItem("perpus_api_url") || "";
+    let isConnected = false;
+
+    let appState = {
+        students: [
+            { nis: "2401001", nama: "Ahmad Fauzi", kejuruan: "PPLG", tingkat: "XI", status: "Aktif" },
+            { nis: "2401002", nama: "Budi Santoso", kejuruan: "PPLG", tingkat: "X", status: "Aktif" },
+            { nis: "2401003", nama: "Siti Aminah", kejuruan: "AKL", tingkat: "XII", status: "Aktif" },
+            { nis: "2401004", nama: "Cici Paramida", kejuruan: "MPLB 1", tingkat: "XI", status: "Aktif" },
+            { nis: "2401005", nama: "Dina Lestari", kejuruan: "MPLB 2", tingkat: "XI", status: "Aktif" }
+        ],
+        books: [
+            { id: "BK-00045", judul: "Pemrograman Python", penulis: "Ahmad Fauzi", kategori: "Teknologi", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null },
+            { id: "BK-00089", judul: "Jaringan Komputer", penulis: "Sandhika Galih", kategori: "Teknologi", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null },
+            { id: "BK-00102", judul: "Bumi Manusia", penulis: "Pramoedya Ananta Toer", kategori: "Fiksi", tipe: "E-Book", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: "bumi_manusia_digital.pdf" },
+            { id: "BK-00331", judul: "Desain Grafis Lanjut", penulis: "Cici Paramida", kategori: "Umum", tipe: "Fisik", status: "Buku Ready", cover: "https://images.unsplash.com/photo-1561070791-26c113006238?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null },
+            { id: "BK-00210", judul: "Dasar Linux", penulis: "Sandhika Galih", kategori: "Teknologi", tipe: "Fisik", status: "Hilang", cover: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=120&h=180&q=80", ebookFile: null }
+        ],
+        loans: [
+            { kode: "PJM-SMKAS-202606-00001", nis: "2401001", nama: "Ahmad Fauzi", kelas: "XI PPLG", bookId: "BK-00045", judul: "Pemrograman Python", status: "menunggu", denda: 0, detailDenda: "", batas: "11 Jun 2026" },
+            { kode: "PJM-SMKAS-202606-00002", nis: "2401002", nama: "Budi Santoso", kelas: "X PPLG", bookId: "BK-00089", judul: "Jaringan Komputer", status: "disiapkan", denda: 0, detailDenda: "", batas: "12 Jun 2026" },
+            { kode: "PJM-SMKAS-202606-00003", nis: "2401003", nama: "Siti Aminah", kelas: "XII AKL", bookId: "BK-00102", judul: "Bumi Manusia", status: "dipinjam", denda: 0, detailDenda: "", batas: "11 Jun 2026" },
+            { kode: "PJM-SMKAS-202605-00080", nis: "2401004", nama: "Cici Paramida", kelas: "XI MPLB 1", bookId: "BK-00331", judul: "Desain Grafis Lanjut", status: "terlambat", denda: 8000, detailDenda: "8 Hari x Rp 1.000", batas: "27 Mei 2026" },
+            { kode: "PJM-SMKAS-202605-00099", nis: "2401005", nama: "Dina Lestari", kelas: "XI MPLB 2", bookId: "BK-00210", judul: "Dasar Linux", status: "terlambat", denda: 65000, detailDenda: "Ganti Buku Hilang (Rp 55.000) + Keterlambatan (10 Hari x Rp 1.000)", batas: "25 Mei 2026" }
+        ],
+        logs: [
+            { timestamp: new Date().toISOString(), aktivitas: "Penerimaan Pengembalian", detail: "Admin menerima buku 'Dasar Linux' dari Dina Lestari." },
+            { timestamp: new Date().toISOString(), aktivitas: "Persetujuan Pinjam", detail: "Menyetujui kode transaksi PJM-SMKAS-202606-00001." },
+            { timestamp: new Date().toISOString(), aktivitas: "Import Data Siswa", detail: "Menambahkan siswa baru sebanyak 5 data awal." }
+        ]
+    };
+
+    let uploadedCoverBase64 = null;
+    let uploadedEbookBase64 = null;
+    let uploadedEbookFileName = null;
+
+    // Inisialisasi visual status database
+    function updateApiStatusIndicator() {
+        const icon = document.getElementById('db-status-icon');
+        const text = document.getElementById('db-status-text');
+        const siswaIcon = document.getElementById('siswa-db-status-icon');
+        const siswaText = document.getElementById('siswa-db-status-text');
+        
+        const updateEl = (ic, tx) => {
+            if (!ic || !tx) return;
+            if (!apiEndpoint) {
+                ic.className = "ph ph-gear text-muted";
+                tx.innerHTML = "Database: Mode Demo 🟡";
+                tx.style.color = "var(--color-text-primary)";
+            } else if (isConnected) {
+                ic.className = "ph ph-plugs-connected text-success";
+                tx.innerHTML = "Database: Terhubung 🟢";
+                tx.style.color = "var(--badge-green-text)";
+            } else {
+                ic.className = "ph ph-plugs text-danger";
+                tx.innerHTML = "Database: Terputus 🔴";
+                tx.style.color = "#ef4444";
+            }
+        };
+        
+        updateEl(icon, text);
+        updateEl(siswaIcon, siswaText);
+    }
+
+    // Memperbarui indikator KPI di Dashboard
+    function updateKPIs() {
+        const totalBuku = appState.books.length;
+        const totalSiswa = appState.students.filter(s => s.status === 'Aktif').length;
+        const peminjamanAktif = appState.loans.filter(l => l.status === 'dipinjam' || l.status === 'terlambat').length;
+        
+        const lateLoans = appState.loans.filter(l => l.status === 'terlambat');
+        const totalDenda = lateLoans.reduce((sum, l) => sum + (l.denda || 0), 0);
+        const terlambatText = lateLoans.length > 0 ? `${lateLoans.length} (Rp ${totalDenda.toLocaleString('id-ID')})` : '0';
+        
+        const kpiBuku = document.getElementById('kpi-total-buku');
+        const kpiSiswa = document.getElementById('kpi-total-siswa');
+        const kpiPeminjaman = document.getElementById('kpi-peminjaman-aktif');
+        const kpiTerlambat = document.getElementById('kpi-terlambat');
+        
+        if (kpiBuku) kpiBuku.innerText = totalBuku;
+        if (kpiSiswa) kpiSiswa.innerText = totalSiswa;
+        if (kpiPeminjaman) kpiPeminjaman.innerText = peminjamanAktif;
+        if (kpiTerlambat) kpiTerlambat.innerText = terlambatText;
+
+        // Update Permintaan Siswa (Request) Badges
+        const totalRequests = appState.loans.filter(l => l.status === 'menunggu').length;
+        const sidebarBadge = document.getElementById('sidebar-request-badge');
+        const tabBadge = document.getElementById('tab-request-badge');
+        
+        if (sidebarBadge) {
+            if (totalRequests > 0) {
+                sidebarBadge.innerText = totalRequests;
+                sidebarBadge.style.display = 'inline-block';
+            } else {
+                sidebarBadge.style.display = 'none';
+            }
+        }
+        
+        if (tabBadge) {
+            if (totalRequests > 0) {
+                tabBadge.innerText = totalRequests;
+                tabBadge.style.display = 'inline-block';
+            } else {
+                tabBadge.style.display = 'none';
+            }
+        }
+    }
+
+
+    // Load data dari API atau memori localStorage
+    async function loadData() {
+        showLoadingState();
+        
+        if (!apiEndpoint) {
+            const savedState = localStorage.getItem("perpus_demo_state");
+            if (savedState) {
+                try {
+                    appState = JSON.parse(savedState);
+                } catch(e) {
+                    console.error("Gagal load demo state", e);
+                }
+            }
+            isConnected = false;
+            updateApiStatusIndicator();
+            afterDataLoaded();
+            return;
+        }
+
+        try {
+            const url = `${apiEndpoint}?action=getAll`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const res = await response.json();
+            
+            if (res.success) {
+                appState.students = res.students || [];
+                appState.books = res.books || [];
+                appState.loans = res.loans || [];
+                appState.logs = res.logs || [];
+                
+                isConnected = true;
+            } else {
+                throw new Error(res.message || "Gagal mengambil data");
+            }
+        } catch (err) {
+            console.error("Gagal koneksi API:", err);
+            isConnected = false;
+            showToast("Koneksi gagal. Menggunakan penyimpanan lokal (Mode Demo).", "error");
+            
+            const savedState = localStorage.getItem("perpus_demo_state");
+            if (savedState) {
+                try { appState = JSON.parse(savedState); } catch(e) {}
+            }
+        }
+        
+        updateApiStatusIndicator();
+        afterDataLoaded();
+    }
+
+    function showLoadingState() {
+        const isSiswa = document.getElementById('view-admin-siswa').style.display === 'block';
+        const isBuku = document.getElementById('view-admin-buku').style.display === 'block';
+        const isSirkulasi = document.getElementById('view-admin-peminjaman').style.display === 'block';
+        
+        if (isSiswa) showTableLoading('siswaTableBody', 6);
+        if (isBuku) showTableLoading('bukuTableBody', 6);
+        if (isSirkulasi) showTableLoading('sirkulasiTableBody', 6);
+    }
+
+    function showTableLoading(tbodyId, cols) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        for (let r = 0; r < 4; r++) {
+            const tr = document.createElement('tr');
+            let tds = "";
+            for (let c = 0; c < cols; c++) {
+                tds += `<td><div class="skeleton-line"></div></td>`;
+            }
+            tr.innerHTML = tds;
+            tbody.appendChild(tr);
+        }
+    }
+
+    // Mengirim modifikasi ke backend API atau menyimpannya lokal
+    async function syncData(action, payload) {
+        if (!apiEndpoint) {
+            localStorage.setItem("perpus_demo_state", JSON.stringify(appState));
+            return true;
+        }
+
+        try {
+            const response = await fetch(apiEndpoint, {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "text/plain"
+                },
+                body: JSON.stringify({ action: action, payload: payload })
+            });
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const res = await response.json();
+            if (res.success) {
+                return true;
+            } else {
+                throw new Error(res.message || "API error");
+            }
+        } catch (e) {
+            console.error("Gagal sinkron data:", e);
+            showToast("Perubahan tersimpan secara lokal. Database terputus.", "error");
+            localStorage.setItem("perpus_demo_state", JSON.stringify(appState));
+            return false;
+        }
+    }
+
+    function addLocalLog(aktivitas, detail) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            aktivitas: aktivitas,
+            detail: detail
+        };
+        appState.logs.unshift(logEntry);
+        syncData("addLog", logEntry);
+    }
+
+    function afterDataLoaded() {
+        const stateChanged = calculateDendaAndLateStatus();
+        if (stateChanged) {
+            syncData("bulkUpdateLoans", appState.loans);
+        }
+        
+        const isDashboard = document.getElementById('view-admin-dashboard').style.display === 'block';
+        const isSirkulasi = document.getElementById('view-admin-peminjaman').style.display === 'block';
+        const isSiswa = document.getElementById('view-admin-siswa').style.display === 'block';
+        const isBuku = document.getElementById('view-admin-buku').style.display === 'block';
+        
+        if (isSiswa) renderSiswaTable();
+        else if (isBuku) renderBukuTable();
+        else if (isSirkulasi) renderSirkulasiTable();
+        
+        updateKPIs();
+        renderClassKeaktifanChart();
+        renderOfficerLogs();
+        
+        // Render katalog siswa jika portal siswa aktif
+        if (currentRole === 'siswa') {
+            renderSiswaKatalog();
+            if (siswaActiveNis) {
+                renderSiswaLoans();
+            }
+        }
+    }
+
+    // ==================================================
+    // KALKULATOR DENDA & STATUS TERLAMBAT OTOMATIS
+    // ==================================================
+    function calculateDendaAndLateStatus() {
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let stateChanged = false;
+        
+        appState.loans.forEach(loan => {
+            if (loan.status === 'dipinjam' || loan.status === 'terlambat') {
+                let batasDate = parseIndonesianDate(loan.batas);
+                if (batasDate) {
+                    batasDate.setHours(0, 0, 0, 0);
+                    if (today > batasDate) {
+                        const diffTime = Math.abs(today - batasDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        let rawDenda = diffDays * 1000;
+                        let detail = `${diffDays} Hari x Rp 1.000`;
+                        
+                        let book = appState.books.find(b => b.id === loan.bookId);
+                        if (book && book.status === "Hilang") {
+                            rawDenda += 55000;
+                            detail = `Ganti Buku Hilang (Rp 55.000) + Keterlambatan (${diffDays} Hari x Rp 1.000)`;
+                        }
+                        
+                        if (loan.status !== 'terlambat' || loan.denda !== rawDenda || loan.detailDenda !== detail) {
+                            loan.status = 'terlambat';
+                            loan.denda = rawDenda;
+                            loan.detailDenda = detail;
+                            stateChanged = true;
+                        }
+                    }
+                }
+            }
+        });
+        
+        return stateChanged;
+    }
+
+    function parseIndonesianDate(dateStr) {
+        if (!dateStr) return null;
+        let parsed = new Date(dateStr);
+        if (!isNaN(parsed.getTime())) return parsed;
+        
+        const months = {
+            "jan": 0, "feb": 1, "mar": 2, "apr": 3, "mei": 4, "jun": 5,
+            "jul": 6, "agu": 7, "sep": 8, "okt": 9, "nov": 10, "des": 11,
+            "juni": 5, "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+        };
+        
+        let parts = dateStr.split(" ");
+        if (parts.length === 3) {
+            let day = parseInt(parts[0]);
+            let monthName = parts[1].toLowerCase().substring(0, 3);
+            let month = months[monthName];
+            let year = parseInt(parts[2]);
+            
+            if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+                return new Date(year, month, day);
+            }
+        }
+        
+        return null;
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `custom-toast ${type}`;
+        
+        const icon = type === 'success' ? 'ph ph-check-circle' : 'ph ph-x-circle';
+        toast.innerHTML = `<i class="${icon}" style="font-size:20px;"></i> <span>${message}</span>`;
+        
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 50);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // SPA Navigation View
+    function switchView(viewId, element = null) {
+        document.getElementById('view-admin-dashboard').style.display = 'none';
+        document.getElementById('view-admin-peminjaman').style.display = 'none';
+        document.getElementById('view-admin-siswa').style.display = 'none';
+        document.getElementById('view-admin-buku').style.display = 'none';
+        
+        document.getElementById(viewId).style.display = 'block';
+
+        if (element) {
+            document.querySelectorAll('.sidebar .nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Render sesuai layar aktif
+        if (viewId === 'view-admin-siswa') renderSiswaTable();
+        if (viewId === 'view-admin-buku') renderBukuTable();
+        if (viewId === 'view-admin-peminjaman') renderSirkulasiTable();
+        
+        updateKPIs();
+        renderClassKeaktifanChart();
+        renderOfficerLogs();
+    }
+
+    // ==================================================
+    // 1. SIRKULASI WORKFLOW
+    // ==================================================
+    function renderSirkulasiTable(filteredData = null) {
+        const tbody = document.getElementById('sirkulasiTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        
+        const data = filteredData || appState.loans;
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Tidak ada transaksi peminjaman ditemukan.</td></tr>`;
+            return;
+        }
+
+        data.forEach(l => {
+            let statusBadge = '';
+            let actionBtn = '';
+            let bookObj = appState.books.find(b => b.id === l.bookId) || { status: "Buku Ready", cover: null };
+            let bookStatusBadge = `<span class="badge-brand status-buku-ready"><i class="ph ph-check-circle"></i> Buku Ready</span>`;
+
+            if (bookObj.status === "Sedang Dipinjam") {
+                bookStatusBadge = `<span class="badge-brand status-buku-borrowed"><i class="ph ph-hand-pointing"></i> Sedang Dipinjam</span>`;
+            } else if (bookObj.status === "Hilang") {
+                bookStatusBadge = `<span class="badge-brand status-buku-lost"><i class="ph ph-warning"></i> Hilang</span>`;
+            }
+
+            const coverSrc = bookObj.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+
+            // Rendering Status & Aksi berdasarkan Alur Transisi
+            switch(l.status) {
+                case 'menunggu':
+                    statusBadge = `<span class="badge-brand bg-warning bg-opacity-10 text-warning" style="color:#d97706!important;"><i class="ph ph-hourglass"></i> Menunggu</span>`;
+                    actionBtn = `
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-sm btn-light px-3 text-danger" style="font-size: 12px; padding: 6px 12px;" onclick="changeLoanStatus('${l.kode}', 'tolak')">Tolak</button>
+                            <button class="btn btn-sm btn-brand-primary px-3" style="font-size: 12px; padding: 6px 12px;" onclick="changeLoanStatus('${l.kode}', 'disetujui')"><i class="ph ph-check"></i> Setujui</button>
+                        </div>
+                    `;
+                    break;
+                case 'disiapkan':
+                    statusBadge = `<span class="badge-brand" style="background-color:#e3f2fd; color:#0288d1;"><i class="ph ph-package"></i> Disiapkan</span>`;
+                    actionBtn = `<button class="btn btn-sm btn-brand-primary px-3" style="font-size: 12px; padding: 6px 12px;" onclick="changeLoanStatus('${l.kode}', 'dipinjam')"><i class="ph ph-hand-pointing"></i> Serahkan Buku</button>`;
+                    break;
+                case 'dipinjam':
+                    statusBadge = `<span class="badge-brand badge-available"><i class="ph ph-book-open"></i> Dipinjam</span><div class="text-secondary mt-1" style="font-size:11px;">Batas: ${l.batas}</div>`;
+                    actionBtn = `<button class="btn btn-sm btn-brand-outline px-3" style="font-size: 12px; padding: 6px 12px;" onclick="changeLoanStatus('${l.kode}', 'selesai')"><i class="ph ph-arrow-u-turn-down"></i> Terima Kembali</button>`;
+                    break;
+                case 'terlambat':
+                    statusBadge = `<span class="badge-brand" style="background-color: #fee2e2; color: #b91c1c;"><i class="ph ph-warning-circle"></i> Terlambat</span><div class="text-danger mt-1 fw-bold" style="font-size:11px;">Batas: ${l.batas}</div>`;
+                    actionBtn = `
+                        <div class="text-danger fw-bold mb-1" style="font-size: 13px;">Denda: Rp ${l.denda.toLocaleString('id-ID')}</div>
+                        <div class="text-muted mb-2" style="font-size: 11px;">(${l.detailDenda})</div>
+                        <button class="btn btn-sm text-white px-3 w-100" style="background-color: #111827; border-radius: var(--radius-pill); font-size: 12px; padding: 6px 12px;" onclick="changeLoanStatus('${l.kode}', 'selesai')"><i class="ph ph-money"></i> Proses Denda & Kembali</button>
+                    `;
+                    break;
+                case 'selesai':
+                    statusBadge = `<span class="badge-brand" style="background-color: var(--color-surface); color: var(--color-text-secondary); border:1px solid var(--color-border)"><i class="ph ph-flag"></i> Selesai</span>`;
+                    actionBtn = `<span class="text-muted" style="font-size:12px;"><i class="ph ph-check-circle"></i> Tuntas (Dikembalikan)</span>`;
+                    break;
+            }
+
+            const tr = document.createElement('tr');
+            tr.className = `row-${l.status}`;
+            tr.innerHTML = `
+                <td><span style="font-family: monospace; font-size: 12px; background-color: var(--color-surface); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-brand-teal);">${l.kode}</span></td>
+                <td><div class="fw-semibold">${l.nama}</div><div class="text-muted mt-1" style="font-size: 11px;">${l.kelas}</div></td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="${coverSrc}" alt="cover" style="width: 32px; height: 46px; object-fit: cover; border-radius: 4px; border: 1px solid var(--color-border);">
+                        <div>
+                            <div class="fw-semibold" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${l.judul}</div>
+                            <div class="text-secondary" style="font-size: 11px;">${l.bookId}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>${statusBadge}</td>
+                <td>${bookStatusBadge}</td>
+                <td class="text-end">${actionBtn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterAdminTable(statusClass, clickedTabElement) {
+        document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+        if(clickedTabElement) clickedTabElement.classList.add('active');
+
+        if (statusClass === 'all') {
+            renderSirkulasiTable();
+        } else {
+            const filtered = appState.loans.filter(l => l.status === statusClass);
+            renderSirkulasiTable(filtered);
+        }
+    }
+
+    async function changeLoanStatus(kode, action) {
+        const loanIndex = appState.loans.findIndex(l => l.kode === kode);
+        if (loanIndex === -1) return;
+
+        let loan = appState.loans[loanIndex];
+        let book = appState.books.find(b => b.id === loan.bookId);
+        let logMsg = "";
+
+        if (action === 'disetujui') {
+            loan.status = 'disiapkan';
+            showToast("Buku disetujui untuk disiapkan!", "success");
+            logMsg = `Menyetujui kode transaksi peminjaman ${kode}`;
+        } else if (action === 'dipinjam') {
+            loan.status = 'dipinjam';
+            if (book) book.status = "Sedang Dipinjam";
+            showToast("Buku resmi dipinjam oleh siswa!", "success");
+            logMsg = `Penyerahan buku ke siswa untuk transaksi ${kode}`;
+        } else if (action === 'selesai') {
+            loan.status = 'selesai';
+            if (book) book.status = "Buku Ready";
+            showToast("Buku kembali ke perpustakaan. Transaksi tuntas!", "success");
+            logMsg = `Menerima pengembalian buku dari transaksi ${kode}`;
+        } else if (action === 'tolak') {
+            appState.loans = appState.loans.filter(l => l.kode !== kode);
+            showToast("Pengajuan peminjaman ditolak.", "error");
+            logMsg = `Menolak transaksi peminjaman kode ${kode}`;
+            
+            const success = await syncData("deleteLoan", { kode: kode });
+            if (success) {
+                addLocalLog("Penolakan PJM", logMsg);
+            }
+            renderSirkulasiTable();
+            updateKPIs();
+            return;
+        }
+
+        renderSirkulasiTable();
+        updateKPIs();
+        
+        const success = await syncData("saveLoan", loan);
+        if (success) {
+            addLocalLog("Sirkulasi Peminjaman", logMsg);
+        }
+        loadData();
+    }
+
+    function showMockScanner() {
+        document.getElementById('scannerModal').style.display = 'flex';
+    }
+    function closeScannerModal() {
+        document.getElementById('scannerModal').style.display = 'none';
+    }
+    function triggerMockScan(kode, targetStatus) {
+        closeScannerModal();
+        changeLoanStatus(kode, targetStatus);
+    }
+
+    // ==================================================
+    // 2. CRUD DATA ANGGOTA / SISWA
+    // ==================================================
+    function renderSiswaTable(dataToRender = appState.students) {
+        const tbody = document.getElementById('siswaTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (dataToRender.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Tidak ada data siswa ditemukan.</td></tr>`;
+            return;
+        }
+
+        dataToRender.forEach(s => {
+            const statusClass = s.status === 'Aktif' ? 'status-buku-ready' : 'status-buku-damaged';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span style="font-family: monospace; font-size: 13px; background-color: var(--color-surface); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-brand-teal);">${s.nis}</span></td>
+                <td><div class="fw-semibold">${s.nama}</div></td>
+                <td><span class="badge-brand badge-tech">${s.kejuruan}</span></td>
+                <td><span class="badge-brand badge-fiction bg-light text-dark border">Kelas ${s.tingkat}</span></td>
+                <td><span class="badge-brand ${statusClass}">${s.status}</span></td>
+                <td class="text-end">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-sm btn-light" style="padding:6px 12px; border-radius: var(--radius-pill);" onclick="openSiswaModal('edit', '${s.nis}')"><i class="ph ph-pencil-line"></i> Edit</button>
+                        <button class="btn btn-sm btn-light text-danger" style="padding:6px 12px; border-radius: var(--radius-pill);" onclick="openDeleteModal('siswa', '${s.nis}')"><i class="ph ph-trash"></i> Hapus</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function applySiswaFilters() {
+        const kejuruanVal = document.getElementById('filterKejuruan').value;
+        const tingkatVal = document.getElementById('filterTingkat').value;
+
+        let filtered = appState.students.filter(s => {
+            const matchesKejuruan = (kejuruanVal === 'ALL') || (s.kejuruan === kejuruanVal);
+            const matchesTingkat = (tingkatVal === 'ALL') || (s.tingkat === tingkatVal);
+            return matchesKejuruan && matchesTingkat;
+        });
+
+        renderSiswaTable(filtered);
+    }
+
+    function resetSiswaFilters() {
+        document.getElementById('filterKejuruan').value = 'ALL';
+        document.getElementById('filterTingkat').value = 'ALL';
+        renderSiswaTable(appState.students);
+        showToast("Filter siswa disetel ulang!", "success");
+    }
+
+    function openSiswaModal(mode = 'create', nis = '') {
+        const modal = document.getElementById('siswaModal');
+        const form = document.getElementById('siswaForm');
+        const title = document.getElementById('siswaModalTitle');
+        const modeInput = document.getElementById('siswaFormMode');
+        const originalNisInput = document.getElementById('siswaOriginalNis');
+        
+        form.reset();
+        modal.style.display = 'flex';
+
+        if (mode === 'edit') {
+            const target = appState.students.find(s => s.nis === nis);
+            if (target) {
+                title.innerText = "Ubah Data Siswa";
+                modeInput.value = "edit";
+                originalNisInput.value = target.nis;
+
+                document.getElementById('siswaNis').value = target.nis;
+                document.getElementById('siswaNama').value = target.nama;
+                document.getElementById('siswaKejuruan').value = target.kejuruan;
+                document.getElementById('siswaTingkat').value = target.tingkat;
+                document.getElementById('siswaStatus').value = target.status;
+            }
+        } else {
+            title.innerText = "Tambah Siswa Baru";
+            modeInput.value = "create";
+            originalNisInput.value = "";
+        }
+    }
+
+    function closeSiswaModal() {
+        document.getElementById('siswaModal').style.display = 'none';
+    }
+
+    async function saveSiswa(e) {
+        e.preventDefault();
+
+        const mode = document.getElementById('siswaFormMode').value;
+        const origNis = document.getElementById('siswaOriginalNis').value;
+        
+        const nis = document.getElementById('siswaNis').value.trim();
+        const nama = document.getElementById('siswaNama').value.trim();
+        const kejuruan = document.getElementById('siswaKejuruan').value;
+        const tingkat = document.getElementById('siswaTingkat').value;
+        const status = document.getElementById('siswaStatus').value;
+
+        const isDuplicate = appState.students.some(s => s.nis === nis && (mode === 'create' || s.nis !== origNis));
+        if (isDuplicate) {
+            showToast("Gagal! Nomor Induk Siswa (NIS) sudah terdaftar.", "error");
+            return;
+        }
+
+        const studentObj = { nis, nama, kejuruan, tingkat, status };
+        let logMsg = "";
+
+        if (mode === 'create') {
+            appState.students.unshift(studentObj);
+            showToast("Siswa baru berhasil ditambahkan!", "success");
+            logMsg = `Menambahkan siswa baru ${nama} (${nis}).`;
+        } else {
+            const index = appState.students.findIndex(s => s.nis === origNis);
+            if (index !== -1) {
+                if (origNis !== nis) {
+                    await syncData("deleteStudent", { nis: origNis });
+                }
+                appState.students[index] = studentObj;
+                showToast("Data siswa berhasil diperbarui!", "success");
+                logMsg = `Mengubah data siswa ${nama} (${nis}).`;
+            }
+        }
+
+        closeSiswaModal();
+        applySiswaFilters();
+        updateKPIs();
+        
+        const success = await syncData("saveStudent", studentObj);
+        if (success) {
+            addLocalLog("Kelola Anggota", logMsg);
+        }
+        loadData();
+    }
+
+    // ==================================================
+    // 3. CRUD KATALOG BUKU & E-BOOK
+    // ==================================================
+    function renderBukuTable(dataToRender = appState.books) {
+        const tbody = document.getElementById('bukuTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (dataToRender.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Koleksi buku tidak ditemukan.</td></tr>`;
+            return;
+        }
+
+        dataToRender.forEach(b => {
+            let statusClass = 'status-buku-ready';
+            if (b.status === "Sedang Dipinjam") statusClass = 'status-buku-borrowed';
+            if (b.status === "Hilang") statusClass = 'status-buku-lost';
+            if (b.status === "Rusak") statusClass = 'status-buku-damaged';
+
+            const formatBadge = b.tipe === "Fisik" ? `<span class="badge-brand badge-tech"><i class="ph ph-barcode"></i> Fisik</span>` : `<span class="badge-brand badge-fiction" style="background:#e1f5fe; color:#0288d1;"><i class="ph ph-file-pdf"></i> E-Book</span>`;
+            const coverImage = b.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span style="font-family: monospace; font-size: 13px; background-color: var(--color-surface); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-brand-teal);">${b.id}</span></td>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="${coverImage}" alt="Cover Buku" style="width: 44px; height: 64px; object-fit: cover; border-radius: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
+                        <div>
+                            <div class="fw-semibold text-dark" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${b.judul}</div>
+                            ${b.ebookFile ? `<small class="text-success d-flex align-items-center gap-1 mt-1"><i class="ph ph-file-pdf"></i> ${b.ebookFile}</small>` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td><div class="text-dark" style="font-size: 13px;">${b.penulis}</div><span class="badge bg-light text-dark border" style="font-size: 10px; padding: 2px 6px;">Kategori: ${b.kategori}</span></td>
+                <td>${formatBadge}</td>
+                <td><span class="badge-brand ${statusClass}">${b.status}</span></td>
+                <td class="text-end">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-sm btn-light" style="padding:6px 12px; border-radius: var(--radius-pill);" onclick="openBukuModal('edit', '${b.id}')"><i class="ph ph-pencil-line"></i> Edit</button>
+                        <button class="btn btn-sm btn-light text-danger" style="padding:6px 12px; border-radius: var(--radius-pill);" onclick="openDeleteModal('buku', '${b.id}')"><i class="ph ph-trash"></i> Hapus</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function applyBukuFilters() {
+        const kategoriVal = document.getElementById('filterKategoriBuku').value;
+        const formatVal = document.getElementById('filterFormatBuku').value;
+
+        let filtered = appState.books.filter(b => {
+            const matchesKategori = (kategoriVal === 'ALL') || (b.kategori === kategoriVal);
+            const matchesFormat = (formatVal === 'ALL') || (b.tipe === formatVal);
+            return matchesKategori && matchesFormat;
+        });
+
+        renderBukuTable(filtered);
+    }
+
+    document.getElementById('bukuFormat').addEventListener('change', function() {
+        const ebookArea = document.getElementById('ebookLinkArea');
+        if (this.value === "E-Book") {
+            ebookArea.style.display = "block";
+        } else {
+            ebookArea.style.display = "none";
+        }
+    });
+
+    // ==================================================
+    // FUNGSI LOGIKA UPLOAD DENGAN RESIZING & KOMPRESI
+    // ==================================================
+    function handleCoverUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            showToast("Ukuran cover terlalu besar (Maksimal 2MB)", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 120;
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                uploadedCoverBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                document.getElementById('coverFileName').innerText = file.name;
+                document.getElementById('coverPreviewImg').src = uploadedCoverBase64;
+                document.getElementById('coverPreviewBox').style.display = 'flex';
+                showToast("Gambar cover berhasil dimuat & dikompresi!", "success");
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeCoverUpload(event) {
+        event.stopPropagation();
+        uploadedCoverBase64 = null;
+        document.getElementById('bukuCoverInput').value = "";
+        document.getElementById('coverPreviewBox').style.display = 'none';
+        showToast("Cover dibatalkan", "error");
+    }
+
+    function handleEbookUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.pdf')) {
+            showToast("Hanya diperbolehkan berkas bertipe PDF", "error");
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            showToast("Ukuran berkas terlalu besar (Maksimal 10MB)", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedEbookBase64 = e.target.result;
+            uploadedEbookFileName = file.name;
+            document.getElementById('ebookFileName').innerText = file.name;
+            document.getElementById('ebookPreviewBox').style.display = 'flex';
+            showToast("Berkas PDF E-Book berhasil dimuat!", "success");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeEbookUpload(event) {
+        event.stopPropagation();
+        uploadedEbookBase64 = null;
+        uploadedEbookFileName = null;
+        document.getElementById('bukuEbookInput').value = "";
+        document.getElementById('ebookPreviewBox').style.display = 'none';
+        showToast("Berkas E-Book dibatalkan", "error");
+    }
+
+    function openBukuModal(mode = 'create', id = '') {
+        const modal = document.getElementById('bukuModal');
+        const form = document.getElementById('bukuForm');
+        const title = document.getElementById('bukuModalTitle');
+        const modeInput = document.getElementById('bukuFormMode');
+        const originalIdInput = document.getElementById('bukuOriginalId');
+        
+        form.reset();
+        
+        uploadedCoverBase64 = null;
+        uploadedEbookBase64 = null;
+        uploadedEbookFileName = null;
+        document.getElementById('coverPreviewBox').style.display = 'none';
+        document.getElementById('ebookPreviewBox').style.display = 'none';
+        document.getElementById('ebookLinkArea').style.display = "none";
+        
+        modal.style.display = 'flex';
+
+        if (mode === 'edit') {
+            const target = appState.books.find(b => b.id === id);
+            if (target) {
+                title.innerText = "Ubah Data Buku";
+                modeInput.value = "edit";
+                originalIdInput.value = target.id;
+
+                document.getElementById('bukuId').value = target.id;
+                document.getElementById('bukuJudul').value = target.judul;
+                document.getElementById('bukuPenulis').value = target.penulis;
+                document.getElementById('bukuKategori').value = target.kategori;
+                document.getElementById('bukuFormat').value = target.tipe;
+                
+                if (target.cover) {
+                    uploadedCoverBase64 = target.cover;
+                    document.getElementById('coverFileName').innerText = "Cover Terunggah";
+                    document.getElementById('coverPreviewImg').src = target.cover;
+                    document.getElementById('coverPreviewBox').style.display = 'flex';
+                }
+
+                if (target.tipe === "E-Book") {
+                    document.getElementById('ebookLinkArea').style.display = "block";
+                    if (target.ebookFile) {
+                        uploadedEbookFileName = target.ebookFile;
+                        document.getElementById('ebookFileName').innerText = target.ebookFile;
+                        document.getElementById('ebookPreviewBox').style.display = 'flex';
+                    }
+                }
+            }
+        } else {
+            title.innerText = "Tambah Koleksi Baru";
+            modeInput.value = "create";
+            originalIdInput.value = "";
+        }
+    }
+
+    function closeBukuModal() {
+        document.getElementById('bukuModal').style.display = 'none';
+    }
+
+    async function saveBuku(e) {
+        e.preventDefault();
+
+        const mode = document.getElementById('bukuFormMode').value;
+        const origId = document.getElementById('bukuOriginalId').value;
+        
+        const id = document.getElementById('bukuId').value.trim();
+        const judul = document.getElementById('bukuJudul').value.trim();
+        const penulis = document.getElementById('bukuPenulis').value.trim();
+        const kategori = document.getElementById('bukuKategori').value;
+        const tipe = document.getElementById('bukuFormat').value;
+
+        const isDuplicate = appState.books.some(b => b.id === id && (mode === 'create' || b.id !== origId));
+        if (isDuplicate) {
+            showToast("Gagal! ID Buku sudah terdaftar.", "error");
+            return;
+        }
+
+        const finalCover = uploadedCoverBase64;
+        let finalEbook = null;
+        if (tipe === "E-Book") {
+            finalEbook = uploadedEbookBase64 || (mode === 'edit' ? appState.books.find(b => b.id === origId).ebookFile : null);
+        }
+        let logMsg = "";
+
+        const bookObj = { 
+            id, 
+            judul, 
+            penulis, 
+            kategori, 
+            tipe, 
+            status: mode === 'create' ? "Buku Ready" : appState.books.find(b => b.id === origId).status, 
+            cover: finalCover, 
+            ebookFile: finalEbook 
+        };
+
+        if (mode === 'create') {
+            const demoBookObj = { ...bookObj };
+            if (!apiEndpoint && demoBookObj.tipe === "E-Book" && demoBookObj.ebookFile && demoBookObj.ebookFile.startsWith("data:")) {
+                demoBookObj.ebookFile = "https://www.orimi.com/pdf-test.pdf";
+            }
+            appState.books.unshift(demoBookObj);
+            showToast("Koleksi baru berhasil diinventarisasi!", "success");
+            logMsg = `Menambahkan koleksi buku baru '${judul}' (${id}).`;
+        } else {
+            const index = appState.books.findIndex(b => b.id === origId);
+            if (index !== -1) {
+                if (origId !== id) {
+                    await syncData("deleteBook", { id: origId });
+                }
+                const demoBookObj = { ...bookObj };
+                if (!apiEndpoint && demoBookObj.tipe === "E-Book" && demoBookObj.ebookFile && demoBookObj.ebookFile.startsWith("data:")) {
+                    demoBookObj.ebookFile = "https://www.orimi.com/pdf-test.pdf";
+                }
+                appState.books[index] = demoBookObj;
+                showToast("Data koleksi berhasil diperbarui!", "success");
+                logMsg = `Mengubah informasi buku '${judul}' (${id}).`;
+            }
+        }
+
+        closeBukuModal();
+        applyBukuFilters();
+        updateKPIs();
+        
+        const success = await syncData("saveBook", bookObj);
+        if (success) {
+            addLocalLog("Kelola Inventaris", logMsg);
+        }
+        loadData();
+    }
+
+    // ==================================================
+    // 4. KONFIRMASI HAPUS MODAL (UMUM)
+    // ==================================================
+    function openDeleteModal(type, targetId) {
+        document.getElementById('deleteTargetId').value = targetId;
+        document.getElementById('deleteTargetType').value = type;
+
+        const title = document.getElementById('deleteModalTitle');
+        const desc = document.getElementById('deleteModalDesc');
+
+        if (type === 'siswa') {
+            title.innerText = "Hapus Data Anggota?";
+            desc.innerText = "Siswa yang dihapus tidak akan dapat meminjam koleksi perpustakaan lagi.";
+        } else if (type === 'buku') {
+            title.innerText = "Hapus Buku Koleksi?";
+            desc.innerText = "Menghapus buku ini akan menghilangkan data sirkulasi terkait dari sistem.";
+        }
+
+        document.getElementById('confirmDeleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('confirmDeleteModal').style.display = 'none';
+    }
+
+    async function executeDelete() {
+        const type = document.getElementById('deleteTargetType').value;
+        const id = document.getElementById('deleteTargetId').value;
+
+        if (type === 'siswa') {
+            const s = appState.students.find(x => x.nis === id);
+            const nama = s ? s.nama : id;
+            appState.students = appState.students.filter(s => s.nis !== id);
+            renderSiswaTable();
+            showToast("Data siswa berhasil dihapus.", "success");
+            
+            closeDeleteModal();
+            updateKPIs();
+            
+            const success = await syncData("deleteStudent", { nis: id });
+            if (success) {
+                addLocalLog("Kelola Anggota", `Menghapus anggota ${nama} (${id}).`);
+            }
+        } else if (type === 'buku') {
+            const b = appState.books.find(x => x.id === id);
+            const judul = b ? b.judul : id;
+            appState.books = appState.books.filter(b => b.id !== id);
+            renderBukuTable();
+            showToast("Buku berhasil dihapus dari sistem.", "success");
+            
+            closeDeleteModal();
+            updateKPIs();
+            
+            const success = await syncData("deleteBook", { id: id });
+            if (success) {
+                addLocalLog("Kelola Inventaris", `Menghapus buku '${judul}' (${id}).`);
+            }
+        }
+
+        loadData();
+    }
+
+    // ==================================================
+    // 5. PENYARING GLOBAL (GLOBAL SEARCH ENGINE)
+    // ==================================================
+    function handleGlobalSearch() {
+        const term = document.getElementById('searchInput').value.toLowerCase().trim();
+        
+        const isDashboard = document.getElementById('view-admin-dashboard').style.display === 'block';
+        const isSirkulasi = document.getElementById('view-admin-peminjaman').style.display === 'block';
+        const isSiswa = document.getElementById('view-admin-siswa').style.display === 'block';
+        const isBuku = document.getElementById('view-admin-buku').style.display === 'block';
+
+        if (term === "") {
+            if (isSiswa) renderSiswaTable();
+            if (isBuku) renderBukuTable();
+            if (isSirkulasi) renderSirkulasiTable();
+            return;
+        }
+
+        if (isSiswa) {
+            const filtered = appState.students.filter(s => s.nama.toLowerCase().includes(term) || s.nis.includes(term));
+            renderSiswaTable(filtered);
+        } else if (isBuku) {
+            const filtered = appState.books.filter(b => b.judul.toLowerCase().includes(term) || b.id.toLowerCase().includes(term) || b.penulis.toLowerCase().includes(term));
+            renderBukuTable(filtered);
+        } else if (isSirkulasi) {
+            const filtered = appState.loans.filter(l => l.nama.toLowerCase().includes(term) || l.kode.toLowerCase().includes(term) || l.judul.toLowerCase().includes(term));
+            renderSirkulasiTable(filtered);
+        } else if (isDashboard) {
+            showToast("Mencari di semua database perpustakaan...", "success");
+        }
+    }
+
+    // ==================================================
+    // 6. MODAL KONFIGURASI DATABASE API
+    // ==================================================
+    function openConfigModal() {
+        document.getElementById('apiEndpointInput').value = apiEndpoint;
+        document.getElementById('configModal').style.display = 'flex';
+    }
+    function closeConfigModal() {
+        document.getElementById('configModal').style.display = 'none';
+    }
+    async function testApiConnection() {
+        const inputUrl = document.getElementById('apiEndpointInput').value.trim();
+        if (!inputUrl) {
+            showToast("Masukkan URL API terlebih dahulu!", "error");
+            return;
+        }
+        showToast("Menghubungkan ke API...", "success");
+        try {
+            const response = await fetch(`${inputUrl}?action=test`);
+            const res = await response.json();
+            if (res.success) {
+                showToast("Terhubung! Google Sheets siap digunakan.", "success");
+            } else {
+                showToast("Koneksi gagal. Respon tidak sesuai.", "error");
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Koneksi gagal. Pastikan deployment API diatur ke 'Anyone'.", "error");
+        }
+    }
+    function clearConfig() {
+        localStorage.removeItem("perpus_api_url");
+        apiEndpoint = "";
+        isConnected = false;
+        document.getElementById('apiEndpointInput').value = "";
+        updateApiStatusIndicator();
+        closeConfigModal();
+        showToast("Konfigurasi API dihapus. Mode Demo aktif.", "success");
+        loadData();
+    }
+    function saveConfig(e) {
+        e.preventDefault();
+        const inputUrl = document.getElementById('apiEndpointInput').value.trim();
+        localStorage.setItem("perpus_api_url", inputUrl);
+        apiEndpoint = inputUrl;
+        closeConfigModal();
+        showToast("Konfigurasi disimpan. Menyinkronkan data...", "success");
+        loadData();
+    }
+
+    // ==================================================
+    // 7. MODAL TAMBAH PEMINJAMAN MANUAL
+    // ==================================================
+    function openPeminjamanModal() {
+        document.getElementById('loanStudentSearch').value = "";
+        document.getElementById('loanStudentNis').value = "";
+        document.getElementById('loanStudentClass').value = "";
+        
+        populateStudentSearchDropdown();
+        
+        const bookSelect = document.getElementById('loanBookId');
+        bookSelect.innerHTML = `<option value="" disabled selected>Pilih Koleksi Buku...</option>`;
+        
+        appState.books.filter(b => b.status === "Buku Ready").forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id;
+            opt.innerText = `${b.id} - ${b.judul} (${b.tipe})`;
+            bookSelect.appendChild(opt);
+        });
+        
+        const dateInput = document.getElementById('loanBatas');
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() + 7); // Default pinjam 7 hari
+        dateInput.value = defaultDate.toISOString().split('T')[0];
+        
+        document.getElementById('peminjamanModal').style.display = 'flex';
+    }
+    
+    function closePeminjamanModal() {
+        document.getElementById('peminjamanModal').style.display = 'none';
+    }
+    
+    function updateSelectedStudentClass() {
+        const nis = document.getElementById('loanStudentNis').value;
+        const student = appState.students.find(s => s.nis === nis);
+        if (student) {
+            document.getElementById('loanStudentClass').value = `${student.tingkat} ${student.kejuruan}`;
+        }
+    }
+    
+    async function savePeminjaman(e) {
+        e.preventDefault();
+        
+        const nis = document.getElementById('loanStudentNis').value;
+        const bookId = document.getElementById('loanBookId').value;
+        const batasRaw = document.getElementById('loanBatas').value;
+        const status = document.getElementById('loanStatus').value;
+        
+        const student = appState.students.find(s => s.nis === nis);
+        const book = appState.books.find(b => b.id === bookId);
+        
+        if (!student || !book) {
+            showToast("Harap pilih Anggota dan Buku terlebih dahulu.", "error");
+            return;
+        }
+        
+        const d = new Date(batasRaw);
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+        const formattedBatas = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const monthName = String(now.getMonth() + 1).padStart(2, '0');
+        const prefix = `PJM-SMKAS-${year}${monthName}-`;
+        
+        let maxSeq = 0;
+        appState.loans.forEach(l => {
+            if (l.kode.startsWith(prefix)) {
+                const parts = l.kode.split('-');
+                const seq = parseInt(parts[parts.length - 1]);
+                if (seq > maxSeq) maxSeq = seq;
+            }
+        });
+        const nextSeqStr = String(maxSeq + 1).padStart(5, '0');
+        const newCode = `${prefix}${nextSeqStr}`;
+        
+        const newLoan = {
+            kode: newCode,
+            nis: student.nis,
+            nama: student.nama,
+            kelas: document.getElementById('loanStudentClass').value || `${student.tingkat} ${student.kejuruan}`,
+            bookId: book.id,
+            judul: book.judul,
+            status: status,
+            denda: 0,
+            detailDenda: "",
+            batas: formattedBatas
+        };
+        
+        appState.loans.unshift(newLoan);
+        
+        if (status === 'dipinjam') {
+            book.status = "Sedang Dipinjam";
+        }
+        
+        closePeminjamanModal();
+        showToast(`Transaksi ${newCode} berhasil dibuat!`, "success");
+        
+        const success = await syncData("saveLoan", newLoan);
+        if (success) {
+            addLocalLog("Pendaftaran PJM", `Mendaftarkan transaksi peminjaman baru ${newCode} untuk ${student.nama}.`);
+        }
+        afterDataLoaded();
+    }
+
+    // ==================================================
+    // 8. GRAFIK KEAKTIFAN & LOG DINAMIS (DASHBOARD)
+    // ==================================================
+    function renderClassKeaktifanChart() {
+        const chartContainer = document.getElementById('classKeaktifanChart');
+        if (!chartContainer) return;
+        
+        let counts = { "PPLG": 0, "AKL": 0, "MPLB 1": 0, "MPLB 2": 0, "Umum": 0 };
+        
+        appState.loans.forEach(loan => {
+            const student = appState.students.find(s => s.nis === loan.nis);
+            if (student) {
+                if (counts[student.kejuruan] !== undefined) counts[student.kejuruan]++;
+                else counts["Umum"]++;
+            } else {
+                if (loan.kelas && (loan.kelas.includes("RPL") || loan.kelas.includes("PPLG"))) counts["PPLG"]++;
+                else if (loan.kelas && loan.kelas.includes("AKL")) counts["AKL"]++;
+                else if (loan.kelas && loan.kelas.includes("MPLB 1")) counts["MPLB 1"]++;
+                else if (loan.kelas && loan.kelas.includes("MPLB 2")) counts["MPLB 2"]++;
+                else counts["Umum"]++;
+            }
+        });
+        
+        const maxCount = Math.max(...Object.values(counts), 1);
+        chartContainer.innerHTML = "";
+        
+        const colors = ["var(--color-brand-teal)", "var(--color-brand-green)", "var(--color-brand-teal)", "var(--color-brand-green)", "var(--color-text-secondary)"];
+        let i = 0;
+        
+        for (let dept in counts) {
+            const count = counts[dept];
+            const heightPercent = (count / maxCount) * 180;
+            const barHeight = Math.max(heightPercent, 10);
+            
+            const colDiv = document.createElement('div');
+            colDiv.className = "text-center";
+            colDiv.style.width = "18%";
+            colDiv.innerHTML = `
+                <div class="rounded-top" style="height: ${barHeight}px; background-color: ${colors[i % colors.length]}!important; transition: height 0.5s ease-out;" title="${count} Transaksi"></div>
+                <small class="text-secondary mt-2 d-block" style="font-size: 11px; font-weight:500;">${dept}</small>
+                <small class="text-muted d-block" style="font-size: 9px; margin-top:-2px;">${count} pinjam</small>
+            `;
+            chartContainer.appendChild(colDiv);
+            i++;
+        }
+    }
+
+    function renderOfficerLogs() {
+        const listContainer = document.getElementById('officerLogsList');
+        if (!listContainer) return;
+        
+        if (!appState.logs || appState.logs.length === 0) {
+            listContainer.innerHTML = `<li class="text-center text-secondary py-3">Belum ada riwayat aktivitas.</li>`;
+            return;
+        }
+        
+        listContainer.innerHTML = "";
+        appState.logs.slice(0, 3).forEach(log => {
+            const timeStr = formatTimeDifference(new Date(log.timestamp));
+            const li = document.createElement('li');
+            li.className = "pb-3 border-bottom mb-3";
+            li.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <span class="fw-semibold text-dark">${log.aktivitas}</span>
+                    <small class="text-muted">${timeStr}</small>
+                </div>
+                <p class="text-secondary mb-0" style="word-break: break-word;">${log.detail}</p>
+            `;
+            listContainer.appendChild(li);
+        });
+    }
+
+    function formatTimeDifference(date) {
+        if (isNaN(date.getTime())) return "Baru saja";
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHr = Math.floor(diffMin / 60);
+        const diffDays = Math.floor(diffHr / 24);
+        
+        if (diffSec < 60) return "Baru saja";
+        if (diffMin < 60) return `${diffMin} menit lalu`;
+        if (diffHr < 24) return `${diffHr} jam lalu`;
+        if (diffDays === 1) return "Kemarin";
+        return `${diffDays} hari lalu`;
+    }
+
+    // ==================================================
+    // 9. STUDENT ROLE PORTAL LOGIC & ACTIONS
+    // ==================================================
+    let currentRole = "";
+    let siswaActiveNis = "";
+
+    function selectRole(role) {
+        currentRole = role;
+        document.getElementById('view-role-selector').style.display = 'none';
+        
+        if (role === 'admin') {
+            document.getElementById('portal-admin-panel').style.display = 'flex';
+            document.getElementById('portal-siswa-panel').style.display = 'none';
+            switchView('view-admin-dashboard');
+        } else {
+            document.getElementById('portal-admin-panel').style.display = 'none';
+            document.getElementById('portal-siswa-panel').style.display = 'flex';
+            switchSiswaView('view-siswa-katalog');
+        }
+        loadData();
+    }
+
+    function goToRoleSelector() {
+        currentRole = "";
+        document.getElementById('view-role-selector').style.display = 'flex';
+        document.getElementById('portal-admin-panel').style.display = 'none';
+        document.getElementById('portal-siswa-panel').style.display = 'none';
+    }
+
+    function switchSiswaView(viewId, element = null) {
+        document.getElementById('view-siswa-katalog').style.display = 'none';
+        document.getElementById('view-siswa-loans').style.display = 'none';
+        
+        document.getElementById(viewId).style.display = 'block';
+
+        if (element) {
+            document.querySelectorAll('#portal-siswa-panel .nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        if (viewId === 'view-siswa-katalog') {
+            renderSiswaKatalog();
+        } else if (viewId === 'view-siswa-loans') {
+            document.getElementById('siswaSearchNis').value = siswaActiveNis;
+            if (siswaActiveNis) {
+                checkSiswaLoans();
+            } else {
+                document.getElementById('siswaLoansContainer').style.display = 'none';
+            }
+        }
+    }
+
+    function renderSiswaKatalog(dataToRender = null) {
+        const grid = document.getElementById('siswaKatalogGrid');
+        if (!grid) return;
+        grid.innerHTML = "";
+        
+        const books = dataToRender || appState.books;
+        
+        if (books.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Koleksi buku tidak ditemukan.</div>`;
+            return;
+        }
+
+        books.forEach(b => {
+            let statusClass = 'status-buku-ready';
+            if (b.status === "Sedang Dipinjam") statusClass = 'status-buku-borrowed';
+            if (b.status === "Hilang") statusClass = 'status-buku-lost';
+            if (b.status === "Rusak") statusClass = 'status-buku-damaged';
+
+            const coverImage = b.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+            
+            let actionBtn = "";
+            if (b.tipe === "E-Book") {
+                actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick="readEbook('${b.judul.replace(/'/g, "\\'")}', '${b.ebookFile || ''}')"><i class="ph ph-file-pdf"></i> Baca E-Book</button>`;
+            } else {
+                if (b.status === "Buku Ready") {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-primary w-100" onclick="openPinjamMandiriModal('${b.id}')"><i class="ph ph-plus-circle"></i> Pinjam Buku</button>`;
+                } else {
+                    actionBtn = `<button type="button" class="btn btn-sm btn-light border w-100 text-muted" disabled><i class="ph ph-lock"></i> ${b.status}</button>`;
+                }
+            }
+
+            const card = document.createElement('div');
+            card.className = "col-6 col-sm-4 col-md-3";
+            card.innerHTML = `
+                <div class="card-base p-3 d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="position-relative mb-3 text-center" style="background-color: var(--color-surface); border-radius: var(--radius-md); padding: 12px; height: 180px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border);">
+                            <img src="${coverImage}" alt="${b.judul}" style="max-height: 160px; max-width: 110px; object-fit: cover; border-radius: 4px; box-shadow: var(--shadow-sm);">
+                            <span class="position-absolute top-2 right-2 badge bg-dark bg-opacity-70" style="font-size:9px;">${b.tipe}</span>
+                        </div>
+                        <h6 class="mb-1 text-dark text-truncate-2" title="${b.judul}" style="font-size:14px; font-weight:600; line-height:1.3; min-height: 36px;">${b.judul}</h6>
+                        <small class="text-secondary d-block mb-2 text-truncate">${b.penulis}</small>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-1">
+                            <span class="badge-brand badge-tech" style="font-size:10px;">${b.kategori}</span>
+                            <span class="badge-brand ${statusClass}" style="font-size:10px;">${b.status}</span>
+                        </div>
+                    </div>
+                    <div>
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function handleSiswaSearch() {
+        const term = document.getElementById('siswaSearchInput').value.toLowerCase().trim();
+        const kOption = document.getElementById('siswaFilterKategori').value;
+        const fOption = document.getElementById('siswaFilterFormat').value;
+
+        const filtered = appState.books.filter(b => {
+            const matchesSearch = b.judul.toLowerCase().includes(term) || b.penulis.toLowerCase().includes(term) || b.id.toLowerCase().includes(term);
+            const matchesKategori = (kOption === 'ALL') || (b.kategori === kOption);
+            const matchesFormat = (fOption === 'ALL') || (b.tipe === fOption);
+            return matchesSearch && matchesKategori && matchesFormat;
+        });
+
+        renderSiswaKatalog(filtered);
+    }
+
+    function applySiswaKatalogFilters() {
+        handleSiswaSearch();
+    }
+
+    function openPinjamMandiriModal(bookId) {
+        const book = appState.books.find(b => b.id === bookId);
+        if (!book) return;
+
+        document.getElementById('pinjamBookId').value = book.id;
+        document.getElementById('pinjamBookTitle').innerText = book.judul;
+        document.getElementById('pinjamBookAuthor').innerText = book.penulis;
+        document.getElementById('pinjamBookCover').src = book.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=120&h=180&q=80';
+        document.getElementById('pinjamSiswaNis').value = siswaActiveNis;
+        
+        document.getElementById('pinjamMandiriModal').style.display = 'flex';
+    }
+
+    function closePinjamMandiriModal() {
+        document.getElementById('pinjamMandiriModal').style.display = 'none';
+    }
+
+    async function submitPinjamMandiri(e) {
+        e.preventDefault();
+        const nis = document.getElementById('pinjamSiswaNis').value.trim();
+        const bookId = document.getElementById('pinjamBookId').value;
+
+        const student = appState.students.find(s => s.nis === nis);
+        if (!student) {
+            showToast("Gagal! Nomor Induk Siswa (NIS) tidak ditemukan.", "error");
+            return;
+        }
+        if (student.status !== "Aktif") {
+            showToast("Gagal! Status akun keanggotaan Anda tidak aktif.", "error");
+            return;
+        }
+
+        const book = appState.books.find(b => b.id === bookId);
+        if (!book || book.status !== "Buku Ready") {
+            showToast("Gagal! Buku tidak tersedia untuk dipinjam.", "error");
+            return;
+        }
+
+        siswaActiveNis = nis;
+        document.getElementById('siswa-active-name').innerText = student.nama;
+
+        const dateBatas = new Date();
+        dateBatas.setDate(dateBatas.getDate() + 7);
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+        const formattedBatas = `${dateBatas.getDate()} ${months[dateBatas.getMonth()]} ${dateBatas.getFullYear()}`;
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const monthName = String(now.getMonth() + 1).padStart(2, '0');
+        const prefix = `PJM-SMKAS-${year}${monthName}-`;
+        
+        let maxSeq = 0;
+        appState.loans.forEach(l => {
+            if (l.kode.startsWith(prefix)) {
+                const parts = l.kode.split('-');
+                const seq = parseInt(parts[parts.length - 1]);
+                if (seq > maxSeq) maxSeq = seq;
+            }
+        });
+        const nextSeqStr = String(maxSeq + 1).padStart(5, '0');
+        const newCode = `${prefix}${nextSeqStr}`;
+
+        const newLoan = {
+            kode: newCode,
+            nis: student.nis,
+            nama: student.nama,
+            kelas: `${student.tingkat} ${student.kejuruan}`,
+            bookId: book.id,
+            judul: book.judul,
+            status: "menunggu",
+            denda: 0,
+            detailDenda: "",
+            batas: formattedBatas
+        };
+
+        appState.loans.unshift(newLoan);
+        closePinjamMandiriModal();
+        showToast("Pengajuan peminjaman berhasil diajukan!", "success");
+
+        showSiswaTicket(newLoan);
+
+        const success = await syncData("saveLoan", newLoan);
+        if (success) {
+            addLocalLog("Pengajuan PJM", `Siswa ${student.nama} mengajukan peminjaman mandiri kode ${newCode}.`);
+        }
+        afterDataLoaded();
+    }
+
+    function showSiswaTicket(loan) {
+        document.getElementById('ticketCode').innerText = loan.kode;
+        document.getElementById('ticketStudent').innerText = loan.nama;
+        document.getElementById('ticketClass').innerText = loan.kelas;
+        document.getElementById('ticketBook').innerText = loan.judul;
+        document.getElementById('ticketBatas').innerText = loan.batas;
+        
+        let statusText = "Menunggu";
+        let statusClass = "bg-warning bg-opacity-10 text-warning";
+        if (loan.status === "disiapkan") {
+            statusText = "Disiapkan";
+            statusClass = "bg-info bg-opacity-10 text-info";
+        } else if (loan.status === "dipinjam") {
+            statusText = "Dipinjam";
+            statusClass = "bg-success bg-opacity-10 text-success";
+        } else if (loan.status === "terlambat") {
+            statusText = "Terlambat";
+            statusClass = "bg-danger bg-opacity-10 text-danger";
+        } else if (loan.status === "selesai") {
+            statusText = "Selesai";
+            statusClass = "bg-secondary bg-opacity-10 text-secondary";
+        }
+        
+        const badge = document.getElementById('ticketStatus');
+        badge.innerText = statusText;
+        badge.className = `badge px-2 ${statusClass}`;
+
+        const qrcodeDiv = document.getElementById('ticketQrcode');
+        qrcodeDiv.innerHTML = "";
+        
+        setTimeout(() => {
+            new QRCode(qrcodeDiv, {
+                text: loan.kode,
+                width: 128,
+                height: 128,
+                colorDark : "#001e2b",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }, 100);
+
+        document.getElementById('siswaTicketModal').style.display = 'flex';
+    }
+
+    function closeSiswaTicketModal() {
+        document.getElementById('siswaTicketModal').style.display = 'none';
+    }
+
+    function readEbook(judul, file) {
+        if (file) {
+            showToast(`Membuka E-Book: ${judul}`, "success");
+            window.open(file, "_blank");
+        } else {
+            showToast("Berkas E-Book digital belum tersedia/diunggah.", "error");
+        }
+    }
+
+    function checkSiswaLoans() {
+        const nis = document.getElementById('siswaSearchNis').value.trim();
+        if (!nis) {
+            showToast("Harap masukkan NIS Anda terlebih dahulu!", "error");
+            return;
+        }
+
+        const student = appState.students.find(s => s.nis === nis);
+        if (!student) {
+            showToast("NIS tidak ditemukan.", "error");
+            document.getElementById('siswaLoansContainer').style.display = 'none';
+            return;
+        }
+
+        siswaActiveNis = nis;
+        document.getElementById('siswa-active-name').innerText = student.nama;
+        
+        renderSiswaLoans();
+    }
+
+    function renderSiswaLoans() {
+        const grid = document.getElementById('siswaLoansGrid');
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        const myLoans = appState.loans.filter(l => l.nis === siswaActiveNis);
+
+        if (myLoans.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Anda belum memiliki riwayat pengajuan peminjaman.</div>`;
+            document.getElementById('siswaLoansContainer').style.display = 'block';
+            return;
+        }
+
+        myLoans.forEach(l => {
+            let statusBadge = "";
+            let actionBtn = "";
+            
+            switch(l.status) {
+                case 'menunggu':
+                    statusBadge = `<span class="badge bg-warning bg-opacity-10 text-warning px-2"><i class="ph ph-hourglass"></i> Menunggu Persetujuan</span>`;
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan Tiket QR</button>`;
+                    break;
+                case 'disiapkan':
+                    statusBadge = `<span class="badge bg-info bg-opacity-10 text-info px-2"><i class="ph ph-package"></i> Buku Disiapkan Pustakawan</span>`;
+                    actionBtn = `<button type="button" class="btn btn-sm btn-brand-outline w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan Tiket QR</button>`;
+                    break;
+                case 'dipinjam':
+                    statusBadge = `<span class="badge bg-success bg-opacity-10 text-success px-2"><i class="ph ph-book-open"></i> Sedang Dipinjam</span>`;
+                    actionBtn = `<small class="text-secondary d-block text-center mt-1">Batas Kembali: ${l.batas}</small>`;
+                    break;
+                case 'terlambat':
+                    statusBadge = `<span class="badge bg-danger bg-opacity-10 text-danger px-2"><i class="ph ph-warning-circle"></i> Terlambat Pengembalian</span>`;
+                    actionBtn = `
+                        <div class="text-danger fw-bold text-center mb-1" style="font-size: 13px;">Denda: Rp ${l.denda.toLocaleString('id-ID')}</div>
+                        <div class="text-muted text-center mb-2" style="font-size: 11px;">(${l.detailDenda})</div>
+                        <button type="button" class="btn btn-sm btn-dark w-100" onclick='showSiswaTicket(${JSON.stringify(l).replace(/'/g, "&apos;")})'><i class="ph ph-qr-code"></i> Tampilkan QR Denda</button>
+                    `;
+                    break;
+                case 'selesai':
+                    statusBadge = `<span class="badge bg-secondary bg-opacity-10 text-secondary px-2"><i class="ph ph-check-circle"></i> Selesai (Dikembalikan)</span>`;
+                    actionBtn = `<small class="text-muted d-block text-center mt-1"><i class="ph ph-flag"></i> Dikembalikan tepat waktu</small>`;
+                    break;
+            }
+
+            const card = document.createElement('div');
+            card.className = "col-12 col-md-6 col-lg-4";
+            card.innerHTML = `
+                <div class="card-base p-3 d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="font-monospace text-secondary" style="font-size:11px;">${l.kode}</span>
+                            ${statusBadge}
+                        </div>
+                        <h6 class="mb-1 fw-bold text-dark text-truncate">${l.judul}</h6>
+                        <small class="text-muted d-block mb-3">ID Buku: ${l.bookId}</small>
+                    </div>
+                    <div>
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        document.getElementById('siswaLoansContainer').style.display = 'block';
+    }
+
+    // ==================================================
+    // 10. SEARCHABLE STUDENT AUTOCOMPLETE DROPDOWN
+    // ==================================================
+    function populateStudentSearchDropdown(filteredStudents = null) {
+        const dropdown = document.getElementById('studentSearchDropdown');
+        if (!dropdown) return;
+        dropdown.innerHTML = "";
+        
+        const list = filteredStudents || appState.students.filter(s => s.status === "Aktif");
+        
+        if (list.length === 0) {
+            dropdown.innerHTML = `<div class="p-2 text-muted text-center" style="font-size:12px;">Tidak ada siswa aktif ditemukan</div>`;
+            return;
+        }
+        
+        list.forEach(s => {
+            const div = document.createElement('div');
+            div.className = "p-2 rounded cursor-pointer student-dropdown-item";
+            div.style.fontSize = "13px";
+            div.style.transition = "background-color 0.2s";
+            div.innerText = `${s.nis} - ${s.nama} (${s.tingkat} ${s.kejuruan})`;
+            
+            div.onmouseover = () => { div.style.backgroundColor = "var(--color-surface)"; };
+            div.onmouseout = () => { div.style.backgroundColor = "transparent"; };
+            
+            div.onclick = () => {
+                document.getElementById('loanStudentSearch').value = `${s.nis} - ${s.nama}`;
+                document.getElementById('loanStudentNis').value = s.nis;
+                document.getElementById('loanStudentClass').value = `${s.tingkat} ${s.kejuruan}`;
+                dropdown.style.display = "none";
+            };
+            
+            dropdown.appendChild(div);
+        });
+    }
+
+    function showStudentDropdown() {
+        const dropdown = document.getElementById('studentSearchDropdown');
+        if (dropdown) {
+            dropdown.style.display = "block";
+            populateStudentSearchDropdown();
+        }
+    }
+
+    function filterStudentDropdown() {
+        const val = document.getElementById('loanStudentSearch').value.toLowerCase();
+        const filtered = appState.students.filter(s => 
+            s.status === "Aktif" && 
+            (s.nama.toLowerCase().includes(val) || s.nis.includes(val) || s.kejuruan.toLowerCase().includes(val))
+        );
+        populateStudentSearchDropdown(filtered);
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('studentSearchDropdown');
+        const searchInput = document.getElementById('loanStudentSearch');
+        if (dropdown && searchInput && !dropdown.contains(e.target) && e.target !== searchInput) {
+            dropdown.style.display = "none";
+        }
+    });
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', () => {
+        goToRoleSelector();
+    });
+</script>
+</body>
+</html>
