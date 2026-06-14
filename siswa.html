@@ -638,7 +638,7 @@
     // ==================================================
     // GLOBAL STATE MANAGEMENT (REACTIVE DATABASE & API)
     // ==================================================
-    let apiEndpoint = localStorage.getItem("perpus_api_url") || "";
+    let apiEndpoint = localStorage.getItem("perpus_api_url") || "https://script.google.com/macros/s/AKfycbyG4IpOre7B7rUCwqZDT65qh5qrjwqJp4GIxWuR4Bh7_NsRVaKjfTTgiKcNs30SQkeNfg/exec";
     let isConnected = false;
     let siswaActiveNis = localStorage.getItem("siswa_nis") || "";
 
@@ -1135,7 +1135,7 @@
                 height: 128,
                 colorDark : "#001e2b",
                 colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+                correctLevel : QRCode.CorrectLevel.M
             });
         }, 100);
 

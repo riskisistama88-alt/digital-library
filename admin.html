@@ -1241,7 +1241,7 @@
     // ==================================================
     // GLOBAL STATE MANAGEMENT (REACTIVE DATABASE & API)
     // ==================================================
-    let apiEndpoint = localStorage.getItem("perpus_api_url") || "";
+    let apiEndpoint = localStorage.getItem("perpus_api_url") || "https://script.google.com/macros/s/AKfycbyG4IpOre7B7rUCwqZDT65qh5qrjwqJp4GIxWuR4Bh7_NsRVaKjfTTgiKcNs30SQkeNfg/exec";
     let isConnected = false;
 
     let appState = {
@@ -2007,7 +2007,7 @@
             handleScannedCode(decodedText);
         };
         
-        const config = { fps: 10, qrbox: { width: 180, height: 180 } };
+        const config = { fps: 25, qrbox: { width: 220, height: 220 } };
         
         html5QrCode.start(cameraId, config, qrCodeSuccessCallback)
             .then(() => {
