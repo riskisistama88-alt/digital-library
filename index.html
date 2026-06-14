@@ -517,7 +517,7 @@
         e.preventDefault();
         const nis = document.getElementById('siswaNis').value.trim();
         
-        const student = appState.students.find(s => s.nis === nis);
+        const student = appState.students.find(s => String(s.nis) === String(nis));
         if (!student) {
             showToast("Gagal! ID Anggota tidak ditemukan.", "error");
             return;
@@ -580,7 +580,7 @@
     }
 
     function localAdminCheck(user, pass) {
-        const adminAccount = appState.students.find(s => s.peran === "Pustakawan" && s.nis === user && s.sandi === pass);
+        const adminAccount = appState.students.find(s => s.peran === "Pustakawan" && String(s.nis) === String(user) && String(s.sandi) === String(pass));
 
         if ((user === "admin" && pass === "admin123") || adminAccount) {
             if (adminAccount && adminAccount.status !== "Aktif") {
@@ -641,7 +641,7 @@
         const tingkat = peran === 'Siswa' ? document.getElementById('regTingkat').value : '-';
         
         // Find member in master database
-        const masterStudent = appState.students.find(s => s.nis === nis);
+        const masterStudent = appState.students.find(s => String(s.nis) === String(nis));
         if (!masterStudent) {
             showToast("Gagal! ID/NIS tidak terdaftar di database master sekolah. Hubungi pustakawan.", "error");
             return;
@@ -649,7 +649,7 @@
 
         // Verify name matches case-insensitive, ignoring extra spacing
         const cleanNameInput = nama.toLowerCase().replace(/\s+/g, ' ').trim();
-        const cleanMasterName = masterStudent.nama.toLowerCase().replace(/\s+/g, ' ').trim();
+        const cleanMasterName = String(masterStudent.nama || "").toLowerCase().replace(/\s+/g, ' ').trim();
 
         if (cleanMasterName !== cleanNameInput) {
             showToast("Gagal! Nama Lengkap tidak cocok dengan database sekolah.", "error");
@@ -657,7 +657,7 @@
         }
 
         // Verify if account has already been registered/activated (phone number set)
-        if (masterStudent.telepon && masterStudent.telepon.trim() !== "") {
+        if (masterStudent.telepon && String(masterStudent.telepon).trim() !== "") {
             showToast("Gagal! Akun ini sudah diaktifkan sebelumnya.", "error");
             return;
         }

@@ -321,7 +321,7 @@ function doPost(e) {
       const pass = payload.pass;
       
       const students = readSheetData("Students");
-      const adminAccount = students.find(s => s.peran === "Pustakawan" && s.nis === user && s.sandi === pass);
+      const adminAccount = students.find(s => s.peran === "Pustakawan" && String(s.nis) === String(user) && String(s.sandi) === String(pass));
       
       if ((user === "admin" && pass === "admin123") || adminAccount) {
         responseData = { success: true };

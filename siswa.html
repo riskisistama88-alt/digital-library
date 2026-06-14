@@ -778,7 +778,7 @@
         calculateDendaAndLateStatus();
         
         // Identitas siswa aktif
-        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        const student = appState.students.find(s => String(s.nis) === String(siswaActiveNis));
         if (student) {
             const roleLabel = student.peran ? ` (${student.peran})` : '';
             document.getElementById('siswa-active-name').innerText = student.nama + roleLabel;
@@ -1031,7 +1031,7 @@
         e.preventDefault();
         
         const bookId = document.getElementById('pinjamBookId').value;
-        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        const student = appState.students.find(s => String(s.nis) === String(siswaActiveNis));
         
         if (!student) {
             showToast("Gagal! Data siswa tidak ditemukan.", "error");
@@ -1060,8 +1060,8 @@
         
         let maxSeq = 0;
         appState.loans.forEach(l => {
-            if (l.kode.startsWith(prefix)) {
-                const parts = l.kode.split('-');
+            if (l.kode && String(l.kode).startsWith(prefix)) {
+                const parts = String(l.kode).split('-');
                 const seq = parseInt(parts[parts.length - 1]);
                 if (seq > maxSeq) maxSeq = seq;
             }
@@ -1163,7 +1163,7 @@
         if (!grid) return;
         grid.innerHTML = "";
 
-        const myLoans = appState.loans.filter(l => l.nis === siswaActiveNis);
+        const myLoans = appState.loans.filter(l => String(l.nis) === String(siswaActiveNis));
 
         if (myLoans.length === 0) {
             grid.innerHTML = `<div class="col-12 text-center text-secondary py-5"><i class="ph ph-info" style="font-size:32px;"></i><br>Anda belum memiliki riwayat pengajuan peminjaman.</div>`;
@@ -1364,7 +1364,7 @@
             return;
         }
 
-        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        const student = appState.students.find(s => String(s.nis) === String(siswaActiveNis));
         if (!student) {
             showToast("Gagal! Data siswa tidak valid.", "error");
             return;
@@ -1488,7 +1488,7 @@
     }
 
     function renderMemberCard() {
-        const student = appState.students.find(s => s.nis === siswaActiveNis);
+        const student = appState.students.find(s => String(s.nis) === String(siswaActiveNis));
         if (!student) return;
 
         document.getElementById('member-card-name').innerText = student.nama;
@@ -1515,7 +1515,7 @@
         const qrDiv = document.getElementById('member-card-qrcode');
         qrDiv.innerHTML = "";
         new QRCode(qrDiv, {
-            text: student.nis,
+            text: String(student.nis),
             width: 56,
             height: 56,
             colorDark : "#001e2b",

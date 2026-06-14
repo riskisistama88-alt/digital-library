@@ -1697,7 +1697,7 @@
                     break;
             }
 
-            let studentObj = appState.students.find(s => s.nis === l.nis);
+            let studentObj = appState.students.find(s => String(s.nis) === String(l.nis));
             let waBadge = '';
             let hMinBadge = '';
             
@@ -2179,7 +2179,7 @@
         modal.style.display = 'flex';
 
         if (mode === 'edit') {
-            const target = appState.students.find(s => s.nis === nis);
+            const target = appState.students.find(s => String(s.nis) === String(nis));
             if (target) {
                 title.innerText = "Ubah Data Pengguna";
                 modeInput.value = "edit";
@@ -2225,7 +2225,7 @@
         const sandi = peran === 'Pustakawan' ? document.getElementById('siswaSandi').value : '';
         const status = document.getElementById('siswaStatus').value;
 
-        const isDuplicate = appState.students.some(s => s.nis === nis && (mode === 'create' || s.nis !== origNis));
+        const isDuplicate = appState.students.some(s => String(s.nis) === String(nis) && (mode === 'create' || String(s.nis) !== String(origNis)));
         if (isDuplicate) {
             showToast("Gagal! ID Anggota/Username sudah terdaftar.", "error");
             return;
@@ -2239,10 +2239,10 @@
             showToast("Data pengguna berhasil ditambahkan!", "success");
             logMsg = `Menambahkan pengguna baru ${nama} (${nis}) sebagai ${peran}.`;
         } else {
-            const index = appState.students.findIndex(s => s.nis === origNis);
+            const index = appState.students.findIndex(s => String(s.nis) === String(origNis));
             if (index !== -1) {
-                if (origNis !== nis) {
-                    await syncData("deleteStudent", { nis: origNis });
+                if (String(origNis) !== String(nis)) {
+                    await syncData("deleteStudent", { nis: String(origNis) });
                 }
                 appState.students[index] = studentObj;
                 showToast("Data pengguna berhasil diperbarui!", "success");
@@ -2574,16 +2574,16 @@
         const id = document.getElementById('deleteTargetId').value;
 
         if (type === 'siswa') {
-            const s = appState.students.find(x => x.nis === id);
+            const s = appState.students.find(x => String(x.nis) === String(id));
             const nama = s ? s.nama : id;
-            appState.students = appState.students.filter(s => s.nis !== id);
+            appState.students = appState.students.filter(s => String(s.nis) !== String(id));
             renderSiswaTable();
             showToast("Data siswa berhasil dihapus.", "success");
             
             closeDeleteModal();
             updateKPIs();
             
-            const success = await syncData("deleteStudent", { nis: id });
+            const success = await syncData("deleteStudent", { nis: String(id) });
             if (success) {
                 addLocalLog("Kelola Anggota", `Menghapus anggota ${nama} (${id}).`);
             }
@@ -2625,7 +2625,7 @@
         }
 
         if (isSiswa) {
-            const filtered = appState.students.filter(s => s.nama.toLowerCase().includes(term) || s.nis.includes(term));
+            const filtered = appState.students.filter(s => s.nama.toLowerCase().includes(term) || String(s.nis).includes(term));
             renderSiswaTable(filtered);
         } else if (isBuku) {
             const filtered = appState.books.filter(b => b.judul.toLowerCase().includes(term) || b.id.toLowerCase().includes(term) || b.penulis.toLowerCase().includes(term));
@@ -2727,7 +2727,7 @@
     
     function updateSelectedStudentClass() {
         const nis = document.getElementById('loanStudentNis').value;
-        const student = appState.students.find(s => s.nis === nis);
+        const student = appState.students.find(s => String(s.nis) === String(nis));
         if (student) {
             document.getElementById('loanStudentClass').value = `${student.tingkat} ${student.kejuruan}`;
         }
@@ -2741,7 +2741,7 @@
         const batasRaw = document.getElementById('loanBatas').value;
         const status = document.getElementById('loanStatus').value;
         
-        const student = appState.students.find(s => s.nis === nis);
+        const student = appState.students.find(s => String(s.nis) === String(nis));
         const book = appState.books.find(b => b.id === bookId);
         
         if (!student || !book) {
@@ -2760,8 +2760,8 @@
         
         let maxSeq = 0;
         appState.loans.forEach(l => {
-            if (l.kode.startsWith(prefix)) {
-                const parts = l.kode.split('-');
+            if (l.kode && String(l.kode).startsWith(prefix)) {
+                const parts = String(l.kode).split('-');
                 const seq = parseInt(parts[parts.length - 1]);
                 if (seq > maxSeq) maxSeq = seq;
             }
@@ -2812,7 +2812,7 @@
         let counts = { "PPLG": 0, "AKL": 0, "MPLB 1": 0, "MPLB 2": 0, "Umum": 0 };
         
         appState.loans.forEach(loan => {
-            const student = appState.students.find(s => s.nis === loan.nis);
+            const student = appState.students.find(s => String(s.nis) === String(loan.nis));
             if (student) {
                 if (counts[student.kejuruan] !== undefined) counts[student.kejuruan]++;
                 else counts["Umum"]++;
@@ -3252,7 +3252,7 @@
         for (const item of list) {
             if (!item.nis || !item.nama) continue;
             
-            const isDuplicate = appState.students.some(s => s.nis === item.nis);
+            const isDuplicate = appState.students.some(s => String(s.nis) === String(item.nis));
             if (isDuplicate) {
                 duplicateCount++;
                 continue;
@@ -3293,7 +3293,7 @@
     // ==================================================
     function formatWaNumber(phoneStr) {
         if (!phoneStr) return "";
-        let clean = phoneStr.replace(/\D/g, ""); // Hapus karakter non-angka
+        let clean = String(phoneStr).replace(/\D/g, ""); // Hapus karakter non-angka
         if (clean.startsWith("0")) {
             clean = "62" + clean.substring(1);
         } else if (clean.startsWith("8")) {
@@ -3306,7 +3306,7 @@
         const loan = appState.loans.find(l => l.kode === kode);
         if (!loan) return;
         
-        const student = appState.students.find(s => s.nis === loan.nis);
+        const student = appState.students.find(s => String(s.nis) === String(loan.nis));
         if (!student || !student.telepon) {
             showToast("Nomor WhatsApp siswa tidak ditemukan.", "error");
             return;
@@ -3342,7 +3342,7 @@
         const loan = appState.loans.find(l => l.kode === kode);
         if (!loan) return;
         
-        const student = appState.students.find(s => s.nis === loan.nis);
+        const student = appState.students.find(s => String(s.nis) === String(loan.nis));
         if (!student || !student.telepon) return;
         
         let msg = "";
