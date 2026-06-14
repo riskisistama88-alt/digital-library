@@ -642,6 +642,14 @@
     let isConnected = false;
     let siswaActiveNis = localStorage.getItem("siswa_nis") || "";
 
+    function getLocalDateString() {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     let appState = {
         students: [],
         books: [],
@@ -1080,7 +1088,7 @@
             denda: 0,
             detailDenda: "",
             batas: formattedBatas,
-            tanggalMinta: new Date().toISOString().split('T')[0],
+            tanggalMinta: getLocalDateString(),
             tanggalPinjam: "",
             tanggalKembali: ""
         };

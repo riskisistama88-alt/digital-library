@@ -228,7 +228,7 @@
 
         /* Admin Tabs & Table */
         .admin-tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--color-border); padding-bottom: 16px; overflow-x: auto; }
-        .admin-tab { padding: 8px 20px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--color-text-secondary); background: transparent; border: 1px solid transparent; transition: all 0.2s; white-space: nowrap; }
+        .admin-tab { padding: 8px 20px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--color-text-secondary); background: transparent; border: 1px solid transparent; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
         .admin-tab:hover { background: var(--color-surface); }
         .admin-tab.active { background: var(--color-brand-teal); color: white; }
 
@@ -560,7 +560,7 @@
                         <h2 class="mb-1">Sirkulasi Peminjaman</h2>
                         <p class="text-secondary mb-0">Sistem alur kerja pengelolaan peminjaman buku fisik menggunakan verifikasi scan QR.</p>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <button class="btn btn-brand-outline" onclick="exportLoansToCSV()"><i class="ph ph-download-simple"></i> Ekspor CSV</button>
                         <button class="btn btn-brand-outline" onclick="openPeminjamanModal()"><i class="ph ph-plus-circle"></i> Tambah Peminjaman</button>
                         <button class="btn btn-brand-primary" onclick="showMockScanner()"><i class="ph ph-scan"></i> Scan QR Tiket</button>
@@ -591,26 +591,28 @@
                 </div>
 
                 <!-- Date Filter Panel -->
-                <div class="row g-3 mb-4 p-3 bg-white border rounded" style="border-radius: var(--radius-lg); margin-top: 10px;">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label-custom">Filter Berdasarkan:</label>
-                        <select class="form-select" id="filterDateType" style="border-radius: var(--radius-md); padding: 10px;">
-                            <option value="tanggalMinta">Tanggal Permintaan</option>
-                            <option value="tanggalPinjam">Tanggal Peminjaman</option>
-                            <option value="tanggalKembali">Tanggal Pengembalian</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label-custom">Dari Tanggal:</label>
-                        <input type="date" class="form-control" id="filterStartDate" style="border-radius: var(--radius-md); padding: 10px;">
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label-custom">Sampai Tanggal:</label>
-                        <input type="date" class="form-control" id="filterEndDate" style="border-radius: var(--radius-md); padding: 10px;">
-                    </div>
-                    <div class="col-12 col-md-3 d-flex align-items-end gap-2">
-                        <button class="btn btn-brand-primary w-100" onclick="applySirkulasiDateFilter()" style="padding: 10px;"><i class="ph ph-funnel"></i> Terapkan</button>
-                        <button class="btn btn-brand-outline w-100" onclick="resetSirkulasiDateFilter()" style="padding: 10px;"><i class="ph ph-arrows-counter-clockwise"></i> Reset</button>
+                <div class="mb-4 p-3 bg-white border rounded" style="border-radius: var(--radius-lg); margin-top: 10px;">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label-custom">Filter Berdasarkan:</label>
+                            <select class="form-select" id="filterDateType" style="border-radius: var(--radius-md); padding: 10px;">
+                                <option value="tanggalMinta">Tanggal Permintaan</option>
+                                <option value="tanggalPinjam">Tanggal Peminjaman</option>
+                                <option value="tanggalKembali">Tanggal Pengembalian</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label-custom">Dari Tanggal:</label>
+                            <input type="date" class="form-control" id="filterStartDate" style="border-radius: var(--radius-md); padding: 10px;">
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label-custom">Sampai Tanggal:</label>
+                            <input type="date" class="form-control" id="filterEndDate" style="border-radius: var(--radius-md); padding: 10px;">
+                        </div>
+                        <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                            <button class="btn btn-brand-primary w-100" onclick="applySirkulasiDateFilter()" style="padding: 10px;"><i class="ph ph-funnel"></i> Terapkan</button>
+                            <button class="btn btn-brand-outline w-100" onclick="resetSirkulasiDateFilter()" style="padding: 10px;"><i class="ph ph-arrows-counter-clockwise"></i> Reset</button>
+                        </div>
                     </div>
                 </div>
 
@@ -703,7 +705,7 @@
                         <h2 class="mb-1">Inventaris Buku & E-Book</h2>
                         <p class="text-secondary mb-0">Kelola buku fisik sekolah serta file digital repository (pdf).</p>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <button class="btn btn-brand-outline" onclick="exportBooksToCSV()"><i class="ph ph-download-simple"></i> Ekspor CSV</button>
                         <button class="btn btn-brand-primary" onclick="openBukuModal()"><i class="ph ph-book-open"></i> Tambah Koleksi</button>
                     </div>
@@ -991,8 +993,8 @@
             </div>
 
             <!-- Scanner Display Viewport -->
-            <div id="qr-reader-viewport-container" class="position-relative mb-3" style="width: 100%; height: 260px; background: #001e2b; border: 2px dashed var(--color-brand-green); border-radius: var(--radius-md); overflow: hidden; display: flex; justify-content: center; align-items: center;">
-                <div id="qr-reader" style="width: 100%; height: 100%;"></div>
+            <div id="qr-reader-viewport-container" class="position-relative mb-3" style="width: 100%; min-height: 280px; background: #001e2b; border: 2px dashed var(--color-brand-green); border-radius: var(--radius-md); overflow: hidden; display: flex; justify-content: center; align-items: center;">
+                <div id="qr-reader" style="width: 100%;"></div>
                 
                 <!-- Laser Scanning animation -->
                 <div id="scanner-laser" class="scan-laser" style="display: none;"></div>
@@ -1243,6 +1245,14 @@
     // ==================================================
     let apiEndpoint = localStorage.getItem("perpus_api_url") || "https://script.google.com/macros/s/AKfycbyG4IpOre7B7rUCwqZDT65qh5qrjwqJp4GIxWuR4Bh7_NsRVaKjfTTgiKcNs30SQkeNfg/exec";
     let isConnected = false;
+
+    function getLocalDateString() {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 
     let appState = {
         students: [
@@ -1830,19 +1840,19 @@
 
         if (action === 'disetujui') {
             loan.status = 'disiapkan';
-            if (!loan.tanggalMinta) loan.tanggalMinta = new Date().toISOString().split('T')[0];
+            if (!loan.tanggalMinta) loan.tanggalMinta = getLocalDateString();
             showToast("Buku disetujui untuk disiapkan!", "success");
             logMsg = `Menyetujui kode transaksi peminjaman ${kode}`;
         } else if (action === 'dipinjam') {
             loan.status = 'dipinjam';
-            loan.tanggalPinjam = new Date().toISOString().split('T')[0];
+            loan.tanggalPinjam = getLocalDateString();
             if (!loan.tanggalMinta) loan.tanggalMinta = loan.tanggalPinjam;
             if (book) book.status = "Sedang Dipinjam";
             showToast("Buku resmi dipinjam oleh siswa!", "success");
             logMsg = `Penyerahan buku ke siswa untuk transaksi ${kode}`;
         } else if (action === 'selesai') {
             loan.status = 'selesai';
-            loan.tanggalKembali = new Date().toISOString().split('T')[0];
+            loan.tanggalKembali = getLocalDateString();
             if (book) book.status = "Buku Ready";
             showToast("Buku kembali ke perpustakaan. Transaksi tuntas!", "success");
             logMsg = `Menerima pengembalian buku dari transaksi ${kode}`;
@@ -2007,7 +2017,14 @@
             handleScannedCode(decodedText);
         };
         
-        const config = { fps: 25, qrbox: { width: 220, height: 220 } };
+        const config = { 
+            fps: 25, 
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                const qrboxSize = Math.max(180, Math.floor(minEdge * 0.75));
+                return { width: qrboxSize, height: qrboxSize };
+            }
+        };
         
         html5QrCode.start(cameraId, config, qrCodeSuccessCallback)
             .then(() => {
@@ -2769,7 +2786,7 @@
         const nextSeqStr = String(maxSeq + 1).padStart(5, '0');
         const newCode = `${prefix}${nextSeqStr}`;
         
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateString();
         const newLoan = {
             kode: newCode,
             nis: student.nis,
